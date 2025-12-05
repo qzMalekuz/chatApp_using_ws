@@ -50,6 +50,7 @@ function handleMessage(ws, message){
     if(!type || !payload) return sendError(ws, "Missing type or payload");
 
     if(type === "CHAT") {
+        
         if(!payload.text) return sendError(ws, "Missing text");
 
         broadcast({
@@ -60,6 +61,7 @@ function handleMessage(ws, message){
                 text: payload.text
             }
         });
+
     } else if (type === "SET_USERNAME") {
 
         if(!payload.username) return sendError(ws, "Missing username");
@@ -73,8 +75,19 @@ function handleMessage(ws, message){
                 username: user.username
             }
         });
+
+    } else if (type === "PRIVATE_CHAT") {
+        
+        if(!payload.to || !payload.text) {
+            return sendError(ws, "Missing 'to' or 'text");
+        }
+
+        sendPrivateMessage(user, payload.to, payload.text);
+
     } else {
+
         sendError(ws, "Unknown message type: " + type);
+    
     }
 }
 
@@ -94,12 +107,31 @@ function handleClose(ws) {
     });
 }
 
-function broadcast(message){
+function broadcast(message) {
     const json = JSON.stringify(message);
 
     users.forEach((u) => {
         u.ws.send(json);
     });
+}
+
+function sendPrivateMessage(fromUser, toUserId, text) {
+
+    const reciever = users.find((u) => u.id === toUserId);
+    if(!reciever) {
+        return sendError(ws, "Receiver not found");
+    }
+    const privateMessage = {
+        type: "PRIVATE_CHAT",
+        payload: {
+            from: fromUser.id,
+            username: fromUser.username,
+            text
+        }
+    }
+
+    reciever.ws.send(JSON.stringify(privateMessage));
+    fromUser.ws.send(JSON.stringify(privateMessage));
 }
 
 function sendError(ws, msg){
