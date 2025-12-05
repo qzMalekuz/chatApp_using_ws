@@ -1,9 +1,11 @@
+const send = require("send");
 const {WebSocketServer} = require("ws");
 
 const wss = new WebSocketServer({port: 3000});
 
 let users = [];
 let userId = 0;
+let rooms = {};
 
 wss.on('connection', (ws) =>{
     console.log("Client Connected");
@@ -12,6 +14,7 @@ wss.on('connection', (ws) =>{
     const user = {
         id: userId,
         username: `Guest_${userId}`,
+        room: null,
         ws
     };
 
@@ -84,6 +87,35 @@ function handleMessage(ws, message){
 
         sendPrivateMessage(user, payload.to, payload.text);
 
+    } else if (type === "ROOM_JOIN") {
+
+        if(!payload.room) {
+            return sendError(ws, "Room name required");
+            joinRoom(user, payload.room);
+        }
+
+    } else if (type === "ROOM_LEAVE") {
+
+        leaveRoom(user);
+
+    } else if (type === "ROOM_CHAT") {
+
+        if(!payload.text) {
+            return sendError(ws, "Message required");
+        }
+        if(!user.room) {
+            return sendError(ws, "Join a room first");
+        }
+
+        roomBroadcast(user.room, {
+            type: "ROOM_CHAT",
+            payload: {
+                id: user.id,
+                username: user.username,
+                text: payload.text
+            }
+        });
+
     } else {
 
         sendError(ws, "Unknown message type: " + type);
@@ -105,6 +137,50 @@ function handleClose(ws) {
             username: user.username
         }
     });
+}
+
+function joinRoom (user, roomName) {
+
+    if(!rooms[roomName]) {
+        rooms[roomName] = [];
+    }
+
+    rooms[roomName].push(user.id);
+    user.room = roomName;
+
+    roomBroadcast(roomName, {
+        type: "ROOM_NOTIFICATION",
+        payload: {message: `${user.username} joined ${roomName}`}
+    });
+}
+
+function leaveRoom () {
+
+    rooms[user.room] = rooms[user.room].filter(id => id !== user.id);
+
+    roomBroadcast(user.room, {
+        type: "ROOM_NOTIFICATION",
+        payload: {message: `${user.username} joined ${roomName}`}
+    });
+
+    if(rooms[user.room.length === 0]) {
+        delete rooms[user.room];
+    }
+    user.room = null;
+}
+
+function roomBroadcast () {
+
+    if(!rooms[roomName]) {
+        return;
+    }
+
+    const json = JSON.stringify(message);
+
+    rooms[roomName].forEach(id => {
+        const user = users.find(u => u.id === id);
+        if(user) user.ws.send(json);
+    })
 }
 
 function broadcast(message) {
