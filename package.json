@@ -2,14 +2,13 @@
   "name": "chat-app-ws",
   "version": "1.0.0",
   "description": "WebSocket chat application",
-  "main": "dist/ws.js",
+  "main": "dist/server.js",
   "scripts": {
-    "dev": "ts-node src/ws.ts",
+    "dev": "ts-node src/server.ts",
     "build": "tsc",
-    "start": "node dist/ws.js"
+    "start": "node dist/server.js"
   },
   "dependencies": {
-    "websocketserver": "^1.0.0",
     "ws": "^8.18.3"
   },
   "devDependencies": {
