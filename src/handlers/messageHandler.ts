@@ -11,16 +11,9 @@ import { broadcast, sendPrivateMessage } from "../services/chatService";
 import { joinRoom, leaveRoom, broadcastToRoom } from "../services/roomService";
 import { sendError } from "../utils/send";
 
-/**
- * Parse a raw WebSocket message and route it to the appropriate service.
- *
- * Expected message format: `{ "type": "CHAT", "payload": { ... } }`
- *
- * @param ws  - The sender's WebSocket connection.
- * @param raw - The raw string received from the client.
- */
+
 export function handleMessage(ws: WebSocket, raw: string): void {
-    // ── 1. Parse the incoming JSON ────────────────────────────
+
     let parsed: Message;
 
     try {
@@ -29,14 +22,12 @@ export function handleMessage(ws: WebSocket, raw: string): void {
         return sendError(ws, "Invalid JSON");
     }
 
-    // ── 2. Validate the sender and the message structure ──────
     const { type, payload } = parsed;
     const sender = findUserByWs(ws);
 
     if (!sender) return sendError(ws, "User not found");
     if (!type || !payload) return sendError(ws, "Missing type or payload");
 
-    // ── 3. Route to the correct handler ───────────────────────
     switch (type) {
 
         case "CHAT": {
