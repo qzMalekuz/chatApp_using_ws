@@ -1,18 +1,20 @@
-import http from "http";
+import express from "express";
+import { createServer } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { PORT, AUTH_ENABLED } from "./config";
 import { handleConnection } from "./handlers/connectionHandler";
 import { authenticateConnection } from "./middleware/auth";
 import { startHeartbeat } from "./middleware/heartbeat";
 
-const httpServer = http.createServer((_req, res) => {
-    res.writeHead(200);
-    res.end("WebSocket server is running");
-});
-
+const app = express();
+const server = createServer(app);
 const wss = new WebSocketServer({ noServer: true });
 
-httpServer.on("upgrade", (request, socket, head) => {
+app.get("/", (_req, res) => {
+    res.send("WebSocket server is running");
+});
+
+server.on("upgrade", (request, socket, head) => {
     if (AUTH_ENABLED) {
         const authPayload = authenticateConnection(request);
 
@@ -38,7 +40,7 @@ wss.on("connection", (ws: WebSocket, username?: string) => {
 
 startHeartbeat(wss);
 
-httpServer.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server is running on ws://localhost:${PORT}`);
     console.log(`Auth: ${AUTH_ENABLED ? "ENABLED" : "DISABLED"}`);
 });
