@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "ts-node src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "generate-token": "ts-node scripts/generateToken.ts"
   },
   "dependencies": {
     "dotenv": "^17.3.1",
