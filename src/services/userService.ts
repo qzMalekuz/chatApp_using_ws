@@ -1,52 +1,79 @@
 import { WebSocket } from "ws";
 import { User } from "../types";
 
-let users: User[] = [];
+// ─── In-memory User Store ───────────────────────────────────
+
+/** All currently connected users. */
+let connectedUsers: User[] = [];
+
+/** Auto-incrementing counter for unique user IDs. */
 let nextUserId = 0;
 
+// ─── Public API ─────────────────────────────────────────────
+
 /**
- * Create and register a new user for the given WebSocket connection.
+ * Register a new user for the given WebSocket connection.
+ * Assigns an auto-incremented ID and a default "Guest_N" username.
+ *
+ * @param ws - The newly connected WebSocket.
+ * @returns  The created User object.
  */
 export function addUser(ws: WebSocket): User {
     nextUserId++;
-    const user: User = {
+
+    const newUser: User = {
         id: nextUserId,
         username: `Guest_${nextUserId}`,
         room: null,
         ws,
     };
-    users.push(user);
-    return user;
+
+    connectedUsers.push(newUser);
+    return newUser;
 }
 
 /**
- * Remove a user by their WebSocket reference.
+ * Unregister a user by their WebSocket reference.
+ *
+ * @param ws - The disconnected WebSocket.
+ * @returns  The removed User, or `undefined` if not found.
  */
 export function removeUser(ws: WebSocket): User | undefined {
-    const user = users.find((u) => u.ws === ws);
-    if (user) {
-        users = users.filter((u) => u.ws !== ws);
+    const disconnectedUser = connectedUsers.find((user) => user.ws === ws);
+
+    if (disconnectedUser) {
+        connectedUsers = connectedUsers.filter((user) => user.ws !== ws);
     }
-    return user;
+
+    return disconnectedUser;
 }
 
 /**
- * Find a user by their WebSocket reference.
+ * Look up a user by their WebSocket reference.
+ *
+ * @param ws - The WebSocket to search for.
+ * @returns  The matching User, or `undefined` if not found.
  */
 export function findUserByWs(ws: WebSocket): User | undefined {
-    return users.find((u) => u.ws === ws);
+    return connectedUsers.find((user) => user.ws === ws);
 }
 
 /**
- * Find a user by their numeric ID.
+ * Look up a user by their numeric ID.
+ *
+ * @param id - The user ID to search for.
+ * @returns  The matching User, or `undefined` if not found.
  */
 export function findUserById(id: number): User | undefined {
-    return users.find((u) => u.id === id);
+    return connectedUsers.find((user) => user.id === id);
 }
 
 /**
- * Return the full (read-only) list of connected users.
+ * Get a read-only snapshot of every connected user.
+ * Useful for broadcasting to all clients.
+ *
+ * @returns An immutable array of Users.
  */
 export function getAllUsers(): ReadonlyArray<User> {
-    return users;
+    return connectedUsers;
 }

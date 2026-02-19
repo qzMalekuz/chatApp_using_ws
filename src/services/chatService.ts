@@ -3,36 +3,47 @@ import { sendError, sendJson } from "../utils/send";
 import { getAllUsers, findUserById } from "./userService";
 
 /**
- * Broadcast a message to every connected user.
+ * Broadcast a message to **every** connected user.
+ *
+ * @param message - The message envelope to send.
  */
 export function broadcast(message: Message): void {
-    const json = JSON.stringify(message);
-    getAllUsers().forEach((u) => u.ws.send(json));
+    const serialised = JSON.stringify(message);
+
+    getAllUsers().forEach((connectedUser) => {
+        connectedUser.ws.send(serialised);
+    });
 }
 
 /**
- * Send a private message from one user to another (both parties receive it).
+ * Send a direct message between two users.
+ * Both the sender and the receiver get a copy of the message.
+ *
+ * @param sender      - The user who is sending the message.
+ * @param receiverId  - The ID of the intended recipient.
+ * @param text        - The message body.
  */
 export function sendPrivateMessage(
-    fromUser: User,
-    toUserId: number,
+    sender: User,
+    receiverId: number,
     text: string
 ): void {
-    const receiver = findUserById(toUserId);
+    const receiver = findUserById(receiverId);
 
     if (!receiver) {
-        return sendError(fromUser.ws, "Receiver not found");
+        return sendError(sender.ws, "Receiver not found");
     }
 
-    const privateMessage: Message = {
+    const directMessage: Message = {
         type: "PRIVATE_CHAT",
         payload: {
-            from: fromUser.id,
-            username: fromUser.username,
+            from: sender.id,
+            username: sender.username,
             text,
         },
     };
 
-    sendJson(receiver.ws, privateMessage);
-    sendJson(fromUser.ws, privateMessage);
+    // Both parties receive the message so each side can display it
+    sendJson(receiver.ws, directMessage);
+    sendJson(sender.ws, directMessage);
 }
