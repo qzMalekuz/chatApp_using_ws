@@ -9,23 +9,19 @@ export function handleConnection(ws: WebSocket): void {
 
     const newUser = addUser(ws);
 
-
     broadcast({
         type: "USER_JOINED",
         payload: { id: newUser.id, username: newUser.username },
     });
 
-
     ws.on("message", (data: Buffer) => {
         handleMessage(ws, data.toString());
     });
-
 
     ws.on("close", () => {
         handleDisconnection(ws);
     });
 }
-
 
 function handleDisconnection(ws: WebSocket): void {
     const departedUser = removeUser(ws);
