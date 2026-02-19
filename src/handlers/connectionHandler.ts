@@ -3,12 +3,7 @@ import { addUser, removeUser } from "../services/userService";
 import { broadcast } from "../services/chatService";
 import { handleMessage } from "./messageHandler";
 
-/**
- * Called when a new WebSocket client connects.
- * Creates a user, announces their arrival, and wires up event listeners.
- *
- * @param ws - The newly connected WebSocket.
- */
+
 export function handleConnection(ws: WebSocket): void {
     console.log("Client Connected");
 
