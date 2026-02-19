@@ -8,35 +8,44 @@ import {
 } from "../types";
 import { findUserByWs } from "../services/userService";
 import { broadcast, sendPrivateMessage } from "../services/chatService";
-import { joinRoom, leaveRoom, roomBroadcast } from "../services/roomService";
+import { joinRoom, leaveRoom, broadcastToRoom } from "../services/roomService";
 import { sendError } from "../utils/send";
 
 /**
- * Parse and dispatch an incoming WebSocket message to the correct service.
+ * Parse a raw WebSocket message and route it to the appropriate service.
+ *
+ * Expected message format: `{ "type": "CHAT", "payload": { ... } }`
+ *
+ * @param ws  - The sender's WebSocket connection.
+ * @param raw - The raw string received from the client.
  */
 export function handleMessage(ws: WebSocket, raw: string): void {
-    let msg: Message;
+    // ── 1. Parse the incoming JSON ────────────────────────────
+    let parsed: Message;
 
     try {
-        msg = JSON.parse(raw);
+        parsed = JSON.parse(raw);
     } catch {
         return sendError(ws, "Invalid JSON");
     }
 
-    const { type, payload } = msg;
-    const user = findUserByWs(ws);
+    // ── 2. Validate the sender and the message structure ──────
+    const { type, payload } = parsed;
+    const sender = findUserByWs(ws);
 
-    if (!user) return sendError(ws, "User not found");
+    if (!sender) return sendError(ws, "User not found");
     if (!type || !payload) return sendError(ws, "Missing type or payload");
 
+    // ── 3. Route to the correct handler ───────────────────────
     switch (type) {
+
         case "CHAT": {
             const { text } = payload as ChatPayload;
             if (!text) return sendError(ws, "Missing text");
 
             broadcast({
                 type: "CHAT",
-                payload: { id: user.id, username: user.username, text },
+                payload: { id: sender.id, username: sender.username, text },
             });
             break;
         }
@@ -45,10 +54,11 @@ export function handleMessage(ws: WebSocket, raw: string): void {
             const { username } = payload as SetUsernamePayload;
             if (!username) return sendError(ws, "Missing username");
 
-            user.username = username;
+            sender.username = username;
+
             broadcast({
                 type: "USERNAME_CHANGED",
-                payload: { id: user.id, username: user.username },
+                payload: { id: sender.id, username: sender.username },
             });
             break;
         }
@@ -57,7 +67,7 @@ export function handleMessage(ws: WebSocket, raw: string): void {
             const { to, text } = payload as PrivateChatPayload;
             if (!to || !text) return sendError(ws, "Missing 'to' or 'text'");
 
-            sendPrivateMessage(user, to, text);
+            sendPrivateMessage(sender, to, text);
             break;
         }
 
@@ -65,23 +75,23 @@ export function handleMessage(ws: WebSocket, raw: string): void {
             const { room } = payload as RoomJoinPayload;
             if (!room) return sendError(ws, "Room name required");
 
-            joinRoom(user, room);
+            joinRoom(sender, room);
             break;
         }
 
         case "ROOM_LEAVE": {
-            leaveRoom(user);
+            leaveRoom(sender);
             break;
         }
 
         case "ROOM_CHAT": {
             const { text } = payload as ChatPayload;
             if (!text) return sendError(ws, "Message required");
-            if (!user.room) return sendError(ws, "Join a room first");
+            if (!sender.room) return sendError(ws, "Join a room first");
 
-            roomBroadcast(user.room, {
+            broadcastToRoom(sender.room, {
                 type: "ROOM_CHAT",
-                payload: { id: user.id, username: user.username, text },
+                payload: { id: sender.id, username: sender.username, text },
             });
             break;
         }

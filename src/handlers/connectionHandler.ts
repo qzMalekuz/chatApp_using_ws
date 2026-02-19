@@ -4,37 +4,46 @@ import { broadcast } from "../services/chatService";
 import { handleMessage } from "./messageHandler";
 
 /**
- * Handle a new WebSocket connection.
+ * Called when a new WebSocket client connects.
+ * Creates a user, announces their arrival, and wires up event listeners.
+ *
+ * @param ws - The newly connected WebSocket.
  */
 export function handleConnection(ws: WebSocket): void {
     console.log("Client Connected");
 
-    const user = addUser(ws);
+    const newUser = addUser(ws);
 
+    // Let everyone know a new user has joined
     broadcast({
         type: "USER_JOINED",
-        payload: { id: user.id, username: user.username },
+        payload: { id: newUser.id, username: newUser.username },
     });
 
+    // Listen for incoming messages from this client
     ws.on("message", (data: Buffer) => {
         handleMessage(ws, data.toString());
     });
 
+    // Clean up when this client disconnects
     ws.on("close", () => {
-        handleClose(ws);
+        handleDisconnection(ws);
     });
 }
 
 /**
- * Handle a WebSocket disconnection.
+ * Called when a WebSocket client disconnects.
+ * Removes the user from the store and announces their departure.
+ *
+ * @param ws - The disconnected WebSocket.
  */
-function handleClose(ws: WebSocket): void {
-    const user = removeUser(ws);
+function handleDisconnection(ws: WebSocket): void {
+    const departedUser = removeUser(ws);
 
-    if (!user) return;
+    if (!departedUser) return;
 
     broadcast({
         type: "USER_LEFT",
-        payload: { id: user.id, username: user.username },
+        payload: { id: departedUser.id, username: departedUser.username },
     });
 }
