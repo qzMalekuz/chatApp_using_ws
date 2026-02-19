@@ -4,18 +4,31 @@ import { broadcast } from "../services/chatService";
 import { handleMessage } from "./messageHandler";
 
 
-export function handleConnection(ws: WebSocket): void {
+export function handleConnection(ws: WebSocket, username?: string): void {
     console.log("Client Connected");
 
-    const newUser = addUser(ws);
+    const newUser = addUser(ws, username);
 
     broadcast({
         type: "USER_JOINED",
-        payload: { id: newUser.id, username: newUser.username },
+        payload: {
+            id: newUser.id,
+            username: newUser.username,
+            timestamp: new Date().toISOString(),
+        },
+    });
+
+    // Mark client as alive on pong response (for heartbeat)
+    ws.on("pong", () => {
+        newUser.isAlive = true;
     });
 
     ws.on("message", (data: Buffer) => {
-        handleMessage(ws, data.toString());
+        try {
+            handleMessage(ws, data.toString());
+        } catch (error) {
+            console.error("Unexpected error in handleMessage:", error);
+        }
     });
 
     ws.on("close", () => {
@@ -30,6 +43,10 @@ function handleDisconnection(ws: WebSocket): void {
 
     broadcast({
         type: "USER_LEFT",
-        payload: { id: departedUser.id, username: departedUser.username },
+        payload: {
+            id: departedUser.id,
+            username: departedUser.username,
+            timestamp: new Date().toISOString(),
+        },
     });
 }
