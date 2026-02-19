@@ -4,6 +4,12 @@ import { findUserById } from "./userService";
 let rooms: Record<string, number[]> = {};
 
 export function joinRoom(user: User, roomName: string): void {
+    // Already in this room — ignore
+    if (user.room === roomName) return;
+
+    // Leave current room first if in one
+    if (user.room) leaveRoom(user);
+
     if (!rooms[roomName]) {
         rooms[roomName] = [];
     }
