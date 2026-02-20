@@ -11,7 +11,7 @@ type ChatMode = 'global' | 'room' | 'private';
 type MobileTab = 'users' | 'chat' | 'rooms';
 
 export default function App() {
-  const { currentUser, connected } = useChatContext();
+  const { currentUser, connected, currentRoom } = useChatContext();
   const [usernameSet, setUsernameSet] = useState(false);
   const [chatMode, setChatMode] = useState<ChatMode>('global');
   const [privateChatUserId, setPrivateChatUserId] = useState<number | null>(null);
@@ -72,11 +72,11 @@ export default function App() {
     );
   }
 
-  // Chat tabs config
+  // Chat tabs config — Room tab stays visible as long as user is in a room
   const tabs: { key: ChatMode; label: string; show: boolean }[] = [
     { key: 'global', label: 'Global', show: true },
     { key: 'private', label: 'DM', show: !!privateChatUserId },
-    { key: 'room', label: 'Room', show: chatMode === 'room' },
+    { key: 'room', label: currentRoom ? `# ${currentRoom}` : 'Room', show: !!currentRoom },
   ];
 
   return (

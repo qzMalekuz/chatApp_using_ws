@@ -2,42 +2,42 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @theme {
-  --color-bg-primary: #0f0f1a;
-  --color-bg-secondary: #161625;
-  --color-bg-card: #1c1c2e;
-  --color-bg-input: #22223a;
-  --color-bg-hover: #282845;
+  --color-bg-primary: #111114;
+  --color-bg-secondary: #18181c;
+  --color-bg-card: #1e1e23;
+  --color-bg-input: #242429;
+  --color-bg-hover: #2a2a30;
   --color-accent: #7c3aed;
   --color-accent-hover: #8b5cf6;
   --color-accent-glow: #7c3aed40;
-  --color-text-primary: #eaeaf0;
-  --color-text-muted: #9ca3af;
-  --color-text-dim: #5e5e7a;
-  --color-border: #28283e;
+  --color-text-primary: #e2e2e8;
+  --color-text-muted: #8b8b9a;
+  --color-text-dim: #4e4e60;
+  --color-border: #26262e;
   --color-border-glow: #7c3aed30;
   --color-self-bubble: #3b1d8e;
-  --color-other-bubble: #1e1e32;
+  --color-other-bubble: #1e1e26;
   --color-success: #34d399;
   --color-error: #f87171;
 }
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: #282845 transparent;
+  scrollbar-color: #2a2a30 transparent;
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
   padding: 0;
-  background-color: #0f0f1a;
-  color: #eaeaf0;
+  background-color: #111114;
+  color: #e2e2e8;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
 ::selection {
-  background: #7c3aed60;
+  background: #7c3aed50;
   color: #fff;
 }
 
