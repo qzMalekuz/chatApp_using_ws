@@ -25,81 +25,55 @@ export default function UsernameModal({ onComplete }: Props) {
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="fixed inset-0 z-50 flex items-center justify-center"
-                style={{ background: 'radial-gradient(ellipse at center, #161625 0%, #0f0f1a 70%)' }}
+                className="fixed inset-0 z-50 flex items-center justify-center bg-bg-primary"
             >
-                {/* Ambient glow */}
-                <div className="absolute w-96 h-96 rounded-full opacity-20 blur-3xl"
-                    style={{ background: 'radial-gradient(circle, #7c3aed 0%, transparent 70%)' }} />
-
                 <motion.div
-                    initial={{ scale: 0.85, opacity: 0, y: 20 }}
-                    animate={{ scale: 1, opacity: 1, y: 0 }}
-                    transition={{ type: 'spring', damping: 20, stiffness: 250 }}
-                    className="relative z-10 w-full max-w-md mx-4"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
+                    className="w-full max-w-sm mx-4"
                 >
-                    <div className="bg-bg-card/90 backdrop-blur-xl border border-border rounded-3xl p-10 shadow-2xl"
-                        style={{ boxShadow: '0 0 80px rgba(124, 58, 237, 0.08)' }}>
+                    <div className="bg-bg-card border border-border rounded-2xl p-8">
+                        <h1 className="text-xl font-semibold text-text-primary text-center mb-1">
+                            Welcome
+                        </h1>
+                        <p className="text-text-muted text-sm text-center mb-6">
+                            Choose a display name
+                        </p>
 
-                        <div className="text-center mb-8">
-                            <motion.div
-                                animate={{ rotate: [0, 10, -10, 0] }}
-                                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                                className="text-5xl mb-4"
-                            >
-                                💬
-                            </motion.div>
-                            <h1 className="text-3xl font-bold text-text-primary tracking-tight">
-                                Welcome
-                            </h1>
-                            <p className="text-text-muted text-sm mt-2">
-                                Pick a name. Start chatting.
-                            </p>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    value={name}
-                                    onChange={(e) => { setName(e.target.value); setError(''); }}
-                                    onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-                                    placeholder="Username"
-                                    maxLength={20}
-                                    autoFocus
-                                    className="w-full px-5 py-4 rounded-2xl bg-bg-input border border-border text-text-primary
-                    text-base placeholder-text-dim
-                    focus:border-accent focus:ring-2 focus:ring-accent-glow
-                    transition-all duration-300"
-                                />
-                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-text-dim text-xs">
-                                    {name.length}/20
-                                </span>
-                            </div>
+                        <div className="space-y-3">
+                            <input
+                                type="text"
+                                value={name}
+                                onChange={(e) => { setName(e.target.value); setError(''); }}
+                                onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+                                placeholder="Username"
+                                maxLength={20}
+                                autoFocus
+                                className="w-full px-4 py-3 rounded-xl bg-bg-input border border-border text-text-primary
+                  text-sm placeholder-text-dim focus:border-text-muted transition-colors duration-200"
+                            />
 
                             <AnimatePresence>
                                 {error && (
                                     <motion.p
-                                        initial={{ opacity: 0, y: -8 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -8 }}
-                                        className="text-error text-sm px-1"
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        className="text-error text-xs px-1"
                                     >
                                         {error}
                                     </motion.p>
                                 )}
                             </AnimatePresence>
 
-                            <motion.button
-                                whileHover={{ scale: 1.02, boxShadow: '0 0 30px rgba(124, 58, 237, 0.3)' }}
-                                whileTap={{ scale: 0.97 }}
+                            <button
                                 onClick={handleSubmit}
-                                className="w-full py-4 rounded-2xl bg-accent hover:bg-accent-hover text-white
-                  font-semibold text-base transition-all duration-300 cursor-pointer
-                  shadow-lg shadow-accent/20"
+                                className="w-full py-3 rounded-xl bg-accent text-bg-primary font-semibold text-sm
+                  hover:bg-accent-hover transition-colors duration-200 cursor-pointer"
                             >
-                                Enter Chat →
-                            </motion.button>
+                                Join Chat
+                            </button>
                         </div>
                     </div>
                 </motion.div>

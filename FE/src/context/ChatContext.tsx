@@ -1,10 +1,11 @@
 import { createContext, useContext, useEffect, useRef, useState, useCallback, type ReactNode } from 'react';
-import type { ChatMessage, OnlineUser, ServerMessage } from '../types';
+import type { ChatMessage, OnlineUser, ServerMessage, UserProfile } from '../types';
 
 interface ChatState {
     socket: WebSocket | null;
     connected: boolean;
     currentUser: { id: number; username: string } | null;
+    userProfile: UserProfile;
     onlineUsers: OnlineUser[];
     globalMessages: ChatMessage[];
     privateMessages: Record<number, ChatMessage[]>;
@@ -25,6 +26,8 @@ interface ChatState {
     requestUsers: () => void;
     requestRoomMembers: (room: string) => void;
     dismissError: (index: number) => void;
+    setUserStatus: (status: string) => void;
+    setUserAvatar: (url: string | null) => void;
 }
 
 const ChatContext = createContext<ChatState | null>(null);
@@ -52,6 +55,12 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     const [roomMembers, setRoomMembers] = useState<OnlineUser[]>([]);
     const [typingUsers, setTypingUsers] = useState<Record<string, string[]>>({});
     const [errors, setErrors] = useState<string[]>([]);
+    const [userProfile, setUserProfile] = useState<UserProfile>({
+        status: '',
+        avatarUrl: null,
+        joinedAt: new Date().toISOString(),
+        messagesSent: 0,
+    });
 
     const currentUserRef = useRef(currentUser);
     const currentRoomRef = useRef(currentRoom);
@@ -109,6 +118,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                         const u = payload as { id: number; username: string; timestamp: string };
                         if (!me) {
                             setCurrentUser({ id: u.id, username: u.username });
+                            setUserProfile(prev => ({ ...prev, joinedAt: u.timestamp }));
                         }
                         setOnlineUsers(prev => {
                             if (prev.find(p => p.id === u.id)) return prev;
@@ -250,8 +260,14 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }, [addError]);
 
     const setUsername = useCallback((username: string) => sendMessage('SET_USERNAME', { username }), [sendMessage]);
-    const sendChat = useCallback((text: string) => sendMessage('CHAT', { text }), [sendMessage]);
-    const sendPrivateChat = useCallback((toId: number, text: string) => sendMessage('PRIVATE_CHAT', { to: toId, text }), [sendMessage]);
+    const sendChat = useCallback((text: string) => {
+        sendMessage('CHAT', { text });
+        setUserProfile(prev => ({ ...prev, messagesSent: prev.messagesSent + 1 }));
+    }, [sendMessage]);
+    const sendPrivateChat = useCallback((toId: number, text: string) => {
+        sendMessage('PRIVATE_CHAT', { to: toId, text });
+        setUserProfile(prev => ({ ...prev, messagesSent: prev.messagesSent + 1 }));
+    }, [sendMessage]);
     const joinRoom = useCallback((room: string) => {
         sendMessage('ROOM_JOIN', { room });
         setCurrentRoom(room);
@@ -262,20 +278,25 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         setCurrentRoom(null);
         setRoomMembers([]);
     }, [sendMessage]);
-    const sendRoomChat = useCallback((text: string) => sendMessage('ROOM_CHAT', { text }), [sendMessage]);
+    const sendRoomChat = useCallback((text: string) => {
+        sendMessage('ROOM_CHAT', { text });
+        setUserProfile(prev => ({ ...prev, messagesSent: prev.messagesSent + 1 }));
+    }, [sendMessage]);
     const sendTypingStart = useCallback(() => sendMessage('TYPING_START', {}), [sendMessage]);
     const sendTypingStop = useCallback(() => sendMessage('TYPING_STOP', {}), [sendMessage]);
     const requestUsers = useCallback(() => sendMessage('GET_USERS', {}), [sendMessage]);
     const requestRoomMembers = useCallback((room: string) => sendMessage('ROOM_MEMBERS', { room }), [sendMessage]);
     const dismissError = useCallback((index: number) => setErrors(prev => prev.filter((_, i) => i !== index)), []);
+    const setUserStatus = useCallback((status: string) => setUserProfile(prev => ({ ...prev, status })), []);
+    const setUserAvatar = useCallback((url: string | null) => setUserProfile(prev => ({ ...prev, avatarUrl: url })), []);
 
     return (
         <ChatContext.Provider value={{
-            socket: socketRef.current, connected, currentUser, onlineUsers,
+            socket: socketRef.current, connected, currentUser, userProfile, onlineUsers,
             globalMessages, privateMessages, roomMessages, currentRoom, roomMembers,
             typingUsers, errors, sendMessage, setUsername, sendChat, sendPrivateChat,
             joinRoom, leaveRoom, sendRoomChat, sendTypingStart, sendTypingStop,
-            requestUsers, requestRoomMembers, dismissError,
+            requestUsers, requestRoomMembers, dismissError, setUserStatus, setUserAvatar,
         }}>
             {children}
         </ChatContext.Provider>

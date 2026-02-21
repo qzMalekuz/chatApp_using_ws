@@ -12,7 +12,7 @@ interface Props {
 export default function ChatArea({ chatMode, privateChatUserId }: Props) {
     const {
         globalMessages, roomMessages, privateMessages, currentRoom,
-        currentUser, sendChat, sendRoomChat, sendPrivateChat,
+        sendChat, sendRoomChat, sendPrivateChat,
         sendTypingStart, sendTypingStop, typingUsers, onlineUsers,
     } = useChatContext();
 
@@ -23,18 +23,15 @@ export default function ChatArea({ chatMode, privateChatUserId }: Props) {
     const isTypingRef = useRef(false);
 
     let messages: ChatMessage[] = [];
-    let title = '💬 Global Chat';
-    let subtitle = 'Everyone can see these messages';
+    let title = 'Global Chat';
 
     if (chatMode === 'room' && currentRoom) {
         messages = roomMessages[currentRoom] || [];
         title = `# ${currentRoom}`;
-        subtitle = 'Room messages';
     } else if (chatMode === 'private' && privateChatUserId) {
         messages = privateMessages[privateChatUserId] || [];
         const partner = onlineUsers.find(u => u.id === privateChatUserId);
-        title = `💌 ${partner?.username || 'User'}`;
-        subtitle = 'Private conversation';
+        title = partner?.username || 'Direct Message';
     } else {
         messages = globalMessages;
     }
@@ -83,48 +80,40 @@ export default function ChatArea({ chatMode, privateChatUserId }: Props) {
     return (
         <div className="h-full flex flex-col bg-bg-primary">
             {/* Header */}
-            <div className="px-7 py-5 border-b border-border bg-bg-secondary/60 backdrop-blur-md">
-                <h2 className="text-lg font-bold text-text-primary">{title}</h2>
-                <p className="text-xs text-text-dim mt-0.5">{subtitle}</p>
+            <div className="px-6 py-4 border-b border-border">
+                <h2 className="text-sm font-semibold text-text-primary">{title}</h2>
             </div>
 
             {/* Messages */}
-            <div ref={containerRef} className="flex-1 overflow-y-auto px-7 py-5 space-y-4">
+            <div ref={containerRef} className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
                 {messages.length === 0 && (
-                    <div className="flex flex-col items-center justify-center h-full text-center">
-                        <p className="text-4xl mb-3">✨</p>
-                        <p className="text-text-dim text-sm">No messages yet. Say something!</p>
-                    </div>
+                    <p className="text-text-dim text-sm text-center py-12">No messages yet</p>
                 )}
 
                 <AnimatePresence initial={false}>
                     {messages.map(msg => (
                         <motion.div
                             key={msg.id}
-                            initial={{ opacity: 0, y: 12, scale: 0.97 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.2 }}
                             className={`flex flex-col ${msg.isSelf ? 'items-end' : 'items-start'}`}
                         >
                             {msg.type === 'SYSTEM' || msg.type === 'ROOM_NOTIFICATION' ? (
-                                <div className="w-full flex items-center gap-3 py-2">
-                                    <div className="flex-1 h-px bg-border" />
-                                    <span className="text-text-dim text-[11px] font-medium whitespace-nowrap">{msg.text}</span>
-                                    <div className="flex-1 h-px bg-border" />
-                                </div>
+                                <p className="text-text-dim text-xs text-center w-full py-1">{msg.text}</p>
                             ) : (
-                                <div className={`max-w-[75%] ${msg.isSelf ? 'items-end' : 'items-start'} flex flex-col`}>
+                                <div className={`max-w-[70%]`}>
                                     {!msg.isSelf && (
-                                        <span className="text-[11px] text-text-muted font-semibold mb-1.5 ml-3">{msg.username}</span>
+                                        <span className="text-[11px] text-text-muted mb-1 ml-1 block">{msg.username}</span>
                                     )}
-                                    <div className={`px-5 py-3 text-sm leading-relaxed break-words
+                                    <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed break-words
                     ${msg.isSelf
-                                            ? 'bg-self-bubble text-white rounded-3xl rounded-br-lg shadow-lg shadow-accent/10'
-                                            : 'bg-other-bubble text-text-primary rounded-3xl rounded-bl-lg border border-border'
+                                            ? 'bg-self-bubble text-text-primary rounded-br-md'
+                                            : 'bg-other-bubble text-text-primary rounded-bl-md border border-border'
                                         }`}>
                                         {msg.text}
                                     </div>
-                                    <span className="text-[10px] text-text-dim mt-1.5 mx-3 font-medium">
+                                    <span className="text-[10px] text-text-dim mt-1 mx-1 block">
                                         {timeAgo(msg.timestamp)}
                                     </span>
                                 </div>
@@ -133,62 +122,50 @@ export default function ChatArea({ chatMode, privateChatUserId }: Props) {
                     ))}
                 </AnimatePresence>
 
-                {/* Typing indicator */}
-                <AnimatePresence>
-                    {activeTyping.length > 0 && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 8 }}
-                            className="flex items-center gap-3 px-3"
-                        >
-                            <div className="flex gap-1 bg-other-bubble border border-border px-4 py-2.5 rounded-2xl">
-                                {[0, 1, 2].map(i => (
-                                    <motion.div
-                                        key={i}
-                                        className="w-2 h-2 bg-accent rounded-full"
-                                        animate={{ y: [0, -6, 0] }}
-                                        transition={{ duration: 0.5, repeat: Infinity, delay: i * 0.12, ease: 'easeInOut' }}
-                                    />
-                                ))}
-                            </div>
-                            <span className="text-text-dim text-xs font-medium">{activeTyping.join(', ')} typing</span>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                {activeTyping.length > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="flex items-center gap-2 text-text-muted text-xs"
+                    >
+                        <div className="flex gap-1">
+                            {[0, 1, 2].map(i => (
+                                <motion.div
+                                    key={i}
+                                    className="w-1.5 h-1.5 bg-text-muted rounded-full"
+                                    animate={{ y: [0, -4, 0] }}
+                                    transition={{ duration: 0.5, repeat: Infinity, delay: i * 0.12 }}
+                                />
+                            ))}
+                        </div>
+                        <span>{activeTyping.join(', ')} typing</span>
+                    </motion.div>
+                )}
 
                 <div ref={messagesEndRef} />
             </div>
 
             {/* Input */}
-            <div className="px-5 py-4 border-t border-border bg-bg-secondary/60 backdrop-blur-md">
-                <div className="flex gap-3 items-end bg-bg-input border border-border rounded-2xl px-4 py-2
-          focus-within:border-accent/50 focus-within:ring-2 focus-within:ring-accent-glow transition-all duration-300">
+            <div className="px-4 py-3 border-t border-border">
+                <div className="flex gap-2 items-end">
                     <textarea
                         value={input}
                         onChange={(e) => { setInput(e.target.value); handleTyping(); }}
                         onKeyDown={handleKeyDown}
                         placeholder="Type a message..."
                         rows={1}
-                        className="flex-1 py-2 bg-transparent text-text-primary placeholder-text-dim
-              resize-none text-sm leading-relaxed border-none outline-none"
+                        className="flex-1 px-4 py-2.5 rounded-xl bg-bg-input border border-border text-text-primary
+              placeholder-text-dim resize-none text-sm focus:border-text-muted transition-colors duration-200"
                     />
-                    <motion.button
-                        whileHover={{ scale: 1.08 }}
-                        whileTap={{ scale: 0.92 }}
+                    <button
                         onClick={handleSend}
                         disabled={!input.trim()}
-                        className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-white
-              transition-all duration-200 cursor-pointer
-              ${input.trim()
-                                ? 'bg-accent shadow-lg shadow-accent/30 hover:shadow-accent/50'
-                                : 'bg-bg-hover text-text-dim cursor-not-allowed'
-                            }`}
+                        className="px-4 py-2.5 rounded-xl bg-accent text-bg-primary font-medium text-sm
+              hover:bg-accent-hover transition-colors duration-200
+              disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
                     >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M22 2L11 13" /><path d="M22 2L15 22L11 13L2 9L22 2Z" />
-                        </svg>
-                    </motion.button>
+                        Send
+                    </button>
                 </div>
             </div>
         </div>

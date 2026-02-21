@@ -13,6 +13,13 @@ export interface OnlineUser {
     username: string;
 }
 
+export interface UserProfile {
+    status: string;
+    avatarUrl: string | null;
+    joinedAt: string;
+    messagesSent: number;
+}
+
 export interface ServerMessage {
     type: string;
     payload: Record<string, unknown>;
