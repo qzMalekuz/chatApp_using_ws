@@ -44,3 +44,6 @@ server.listen(PORT, () => {
     console.log(`Server is running on ws://localhost:${PORT}`);
     console.log(`Auth: ${AUTH_ENABLED ? "ENABLED" : "DISABLED"}`);
 });
+
+
+
