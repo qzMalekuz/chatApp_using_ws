@@ -35,7 +35,7 @@ export default function UsernameModal({ onComplete }: Props) {
                 >
                     <div className="bg-bg-card border border-border rounded-2xl p-8">
                         <h1 className="text-xl font-semibold text-text-primary text-center mb-1">
-                            Welcome
+                            Welcome to ChatLo.io
                         </h1>
                         <p className="text-text-muted text-sm text-center mb-6">
                             Choose a display name

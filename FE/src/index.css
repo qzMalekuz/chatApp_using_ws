@@ -1,23 +1,63 @@
 @import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
+@layer base {
+  :root {
+    --color-bg-primary: #111114;
+    --color-bg-secondary: #0a0a0c;
+    --color-bg-card: #1e1e23;
+    --color-bg-input: #242429;
+    --color-bg-hover: #2a2a30;
+    --color-accent: #ffffff;
+    --color-accent-hover: #e0e0e0;
+    --color-accent-glow: #ffffff20;
+    --color-text-primary: #e2e2e8;
+    --color-text-muted: #8b8b9a;
+    --color-text-dim: #4e4e60;
+    --color-border: #26262e;
+    --color-self-bubble: #303038;
+    --color-other-bubble: #1e1e26;
+    --color-success: #34d399;
+    --color-error: #f87171;
+  }
+
+  :root.light {
+    --color-bg-primary: #f5f5f7;
+    --color-bg-secondary: #ffffff;
+    --color-bg-card: #ffffff;
+    --color-bg-input: #f0f0f4;
+    --color-bg-hover: #e8e8ed;
+    --color-accent: #000000;
+    --color-accent-hover: #222222;
+    --color-accent-glow: #00000020;
+    --color-text-primary: #111114;
+    --color-text-muted: #666677;
+    --color-text-dim: #8b8b9a;
+    --color-border: #e0e0e6;
+    --color-self-bubble: #e8e8ed;
+    --color-other-bubble: #ffffff;
+    --color-success: #10b981;
+    --color-error: #ef4444;
+  }
+}
+
 @theme {
-  --color-bg-primary: #111114;
-  --color-bg-secondary: #18181c;
-  --color-bg-card: #1e1e23;
-  --color-bg-input: #242429;
-  --color-bg-hover: #2a2a30;
-  --color-accent: #ffffff;
-  --color-accent-hover: #e0e0e0;
-  --color-accent-glow: #ffffff20;
-  --color-text-primary: #e2e2e8;
-  --color-text-muted: #8b8b9a;
-  --color-text-dim: #4e4e60;
-  --color-border: #26262e;
-  --color-self-bubble: #303038;
-  --color-other-bubble: #1e1e26;
-  --color-success: #34d399;
-  --color-error: #f87171;
+  --color-bg-primary: var(--color-bg-primary);
+  --color-bg-secondary: var(--color-bg-secondary);
+  --color-bg-card: var(--color-bg-card);
+  --color-bg-input: var(--color-bg-input);
+  --color-bg-hover: var(--color-bg-hover);
+  --color-accent: var(--color-accent);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-accent-glow: var(--color-accent-glow);
+  --color-text-primary: var(--color-text-primary);
+  --color-text-muted: var(--color-text-muted);
+  --color-text-dim: var(--color-text-dim);
+  --color-border: var(--color-border);
+  --color-self-bubble: var(--color-self-bubble);
+  --color-other-bubble: var(--color-other-bubble);
+  --color-success: var(--color-success);
+  --color-error: var(--color-error);
 }
 
 * {
@@ -29,10 +69,11 @@
 body {
   margin: 0;
   padding: 0;
-  background-color: #111114;
-  color: #e2e2e8;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 ::selection {
