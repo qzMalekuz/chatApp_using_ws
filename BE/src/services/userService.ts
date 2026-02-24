@@ -10,6 +10,8 @@ export function addUser(ws: WebSocket, username?: string): User {
     const newUser: User = {
         id: nextUserId,
         username: username || `Guest_${nextUserId}`,
+        status: "",
+        avatarUrl: null,
         room: null,
         ws,
         isAlive: true,
@@ -42,9 +44,11 @@ export function getAllUsers(): ReadonlyArray<User> {
     return connectedUsers;
 }
 
-export function getPublicUserList(): { id: number; username: string }[] {
+export function getPublicUserList(): { id: number; username: string; status: string; avatarUrl: string | null }[] {
     return connectedUsers.map((user) => ({
         id: user.id,
         username: user.username,
+        status: user.status,
+        avatarUrl: user.avatarUrl,
     }));
 }

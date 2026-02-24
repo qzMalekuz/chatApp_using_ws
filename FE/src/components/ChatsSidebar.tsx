@@ -9,7 +9,7 @@ interface Props {
 }
 
 export default function ChatsSidebar({ activeChat, onSelectChat, onOpenProfile }: Props) {
-    const { onlineUsers, currentUser, userProfile, requestUsers, connected, currentRoom, roomMembers } = useChatContext();
+    const { onlineUsers, currentUser, userProfile, requestUsers, connected, currentRoom, roomMembers, setSelectedUserProfile } = useChatContext();
     const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
@@ -53,18 +53,23 @@ export default function ChatsSidebar({ activeChat, onSelectChat, onOpenProfile }
         // 3. Direct Messages (Online Users)
         const otherUsers = onlineUsers.filter(u => u.id !== currentUser?.id);
         otherUsers.forEach(u => {
-            // Note: In a real app we'd fetch their actual avatarUrl/status.
-            // Since it's WS broadcast, we will rely on what we have.
             items.push({
                 id: `user:${u.id}`,
                 type: 'user',
                 name: u.username,
-                subtext: 'Online',
+                subtext: u.status || 'Online',
                 icon: (
-                    <div className="relative">
-                        <div className="w-12 h-12 rounded-full bg-bg-card border border-border flex items-center justify-center text-text-primary font-semibold text-lg">
-                            {u.username[0].toUpperCase()}
-                        </div>
+                    <div
+                        className="relative z-10 cursor-pointer hover:opacity-80 transition-opacity"
+                        onClick={(e) => { e.stopPropagation(); setSelectedUserProfile(u.id); }}
+                    >
+                        {u.avatarUrl ? (
+                            <img src={u.avatarUrl} alt="" className="w-12 h-12 rounded-full object-cover border border-border" />
+                        ) : (
+                            <div className="w-12 h-12 rounded-full bg-bg-card border border-border flex items-center justify-center text-text-primary font-semibold text-lg">
+                                {u.username[0]?.toUpperCase()}
+                            </div>
+                        )}
                         <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-success rounded-full border-2 border-bg-secondary" />
                     </div>
                 )

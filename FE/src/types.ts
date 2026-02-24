@@ -11,6 +11,8 @@ export interface ChatMessage {
 export interface OnlineUser {
     id: number;
     username: string;
+    status?: string;
+    avatarUrl?: string | null;
 }
 
 export interface UserProfile {

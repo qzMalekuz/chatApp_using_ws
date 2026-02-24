@@ -14,6 +14,8 @@ interface ChatState {
     roomMembers: OnlineUser[];
     typingUsers: Record<string, string[]>;
     errors: string[];
+    mutedChats: string[];
+    selectedUserIdForProfile: number | null;
     sendMessage: (type: string, payload: Record<string, unknown>) => void;
     setUsername: (username: string) => void;
     sendChat: (text: string) => void;
@@ -28,6 +30,8 @@ interface ChatState {
     dismissError: (index: number) => void;
     setUserStatus: (status: string) => void;
     setUserAvatar: (url: string | null) => void;
+    toggleMute: (chatId: string) => void;
+    setSelectedUserProfile: (userId: number | null) => void;
 }
 
 const ChatContext = createContext<ChatState | null>(null);
@@ -55,6 +59,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     const [roomMembers, setRoomMembers] = useState<OnlineUser[]>([]);
     const [typingUsers, setTypingUsers] = useState<Record<string, string[]>>({});
     const [errors, setErrors] = useState<string[]>([]);
+    const [mutedChats, setMutedChats] = useState<string[]>([]);
+    const [selectedUserIdForProfile, setSelectedUserProfile] = useState<number | null>(null);
     const [userProfile, setUserProfile] = useState<UserProfile>({
         status: '',
         avatarUrl: null,
@@ -138,6 +144,17 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                             id: nextId(), type: 'SYSTEM', userId: u.id, username: u.username,
                             text: `${u.username} left the chat`, timestamp: u.timestamp, isSelf: false,
                         }]);
+                        break;
+                    }
+
+                    case 'USER_UPDATED': {
+                        const u = payload as { id: number; status?: string; avatarUrl?: string | null; timestamp: string };
+                        setOnlineUsers(prev => prev.map(p => {
+                            if (p.id === u.id) {
+                                return { ...p, status: u.status !== undefined ? u.status : p.status, avatarUrl: u.avatarUrl !== undefined ? u.avatarUrl : p.avatarUrl };
+                            }
+                            return p;
+                        }));
                         break;
                     }
 
@@ -287,16 +304,25 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     const requestUsers = useCallback(() => sendMessage('GET_USERS', {}), [sendMessage]);
     const requestRoomMembers = useCallback((room: string) => sendMessage('ROOM_MEMBERS', { room }), [sendMessage]);
     const dismissError = useCallback((index: number) => setErrors(prev => prev.filter((_, i) => i !== index)), []);
-    const setUserStatus = useCallback((status: string) => setUserProfile(prev => ({ ...prev, status })), []);
-    const setUserAvatar = useCallback((url: string | null) => setUserProfile(prev => ({ ...prev, avatarUrl: url })), []);
+    const setUserStatus = useCallback((status: string) => {
+        setUserProfile(prev => ({ ...prev, status }));
+        sendMessage('UPDATE_PROFILE', { status });
+    }, [sendMessage]);
+    const setUserAvatar = useCallback((url: string | null) => {
+        setUserProfile(prev => ({ ...prev, avatarUrl: url }));
+        sendMessage('UPDATE_PROFILE', { avatarUrl: url });
+    }, [sendMessage]);
+    const toggleMute = useCallback((chatId: string) => {
+        setMutedChats(prev => prev.includes(chatId) ? prev.filter(id => id !== chatId) : [...prev, chatId]);
+    }, []);
 
     return (
         <ChatContext.Provider value={{
             socket: socketRef.current, connected, currentUser, userProfile, onlineUsers,
             globalMessages, privateMessages, roomMessages, currentRoom, roomMembers,
-            typingUsers, errors, sendMessage, setUsername, sendChat, sendPrivateChat,
+            typingUsers, errors, mutedChats, selectedUserIdForProfile, sendMessage, setUsername, sendChat, sendPrivateChat,
             joinRoom, leaveRoom, sendRoomChat, sendTypingStart, sendTypingStop,
-            requestUsers, requestRoomMembers, dismissError, setUserStatus, setUserAvatar,
+            requestUsers, requestRoomMembers, dismissError, setUserStatus, setUserAvatar, toggleMute, setSelectedUserProfile,
         }}>
             {children}
         </ChatContext.Provider>

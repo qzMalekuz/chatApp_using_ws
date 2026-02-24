@@ -5,6 +5,8 @@ import { WebSocket } from "ws";
 export interface User {
     id: number;
     username: string;
+    status: string;
+    avatarUrl: string | null;
     room: string | null;
     ws: WebSocket;
     isAlive: boolean;
@@ -24,6 +26,11 @@ export interface ChatPayload {
 
 export interface SetUsernamePayload {
     username?: string;
+}
+
+export interface UpdateProfilePayload {
+    status?: string;
+    avatarUrl?: string | null;
 }
 
 export interface PrivateChatPayload {

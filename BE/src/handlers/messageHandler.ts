@@ -3,6 +3,7 @@ import {
     Message,
     ChatPayload,
     SetUsernamePayload,
+    UpdateProfilePayload,
     PrivateChatPayload,
     RoomJoinPayload,
     TypingPayload,
@@ -61,6 +62,19 @@ export function handleMessage(ws: WebSocket, raw: string): void {
             broadcast({
                 type: "USERNAME_CHANGED",
                 payload: { id: sender.id, username: sender.username, timestamp },
+            });
+            break;
+        }
+
+        case "UPDATE_PROFILE": {
+            const { status, avatarUrl } = payload as UpdateProfilePayload;
+
+            if (status !== undefined) sender.status = String(status).substring(0, 100);
+            if (avatarUrl !== undefined) sender.avatarUrl = avatarUrl; // note: in prod validate URL/base64 length
+
+            broadcast({
+                type: "USER_UPDATED",
+                payload: { id: sender.id, status: sender.status, avatarUrl: sender.avatarUrl, timestamp },
             });
             break;
         }

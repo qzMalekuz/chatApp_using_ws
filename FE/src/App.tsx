@@ -5,9 +5,8 @@ import UsernameModal from './components/UsernameModal';
 import ChatsSidebar from './components/ChatsSidebar';
 import ChatArea from './components/ChatArea';
 import ProfileModal from './components/ProfileModal';
+import UserProfileModal from './components/UserProfileModal';
 import Toast from './components/Toast';
-
-type MobileTab = 'chat' | 'chatsList';
 
 export default function App() {
   const { currentUser, connected, currentRoom, joinRoom } = useChatContext();
@@ -15,8 +14,8 @@ export default function App() {
 
   // 'global', 'room:abc', 'user:123'
   const [activeChatId, setActiveChatId] = useState<string>('global');
+  const [showMobileChat, setShowMobileChat] = useState(false);
 
-  const [mobileTab, setMobileTab] = useState<MobileTab>('chat');
   const [showProfile, setShowProfile] = useState(false);
 
   // Theme Management
@@ -41,7 +40,7 @@ export default function App() {
       const roomName = id.replace('room:', '');
       if (currentRoom !== roomName) joinRoom(roomName);
     }
-    setMobileTab('chat');
+    setShowMobileChat(true); // Slide in chat on mobile
   };
 
   if (!currentUser) {
@@ -67,12 +66,6 @@ export default function App() {
     );
   }
 
-  const tabs: { key: ChatMode; label: string; show: boolean }[] = [
-    { key: 'global', label: 'Global', show: true },
-    { key: 'private', label: 'DM', show: !!privateChatUserId },
-    { key: 'room', label: currentRoom ? `# ${currentRoom}` : 'Room', show: !!currentRoom },
-  ];
-
   return (
     <div className="h-screen flex flex-col bg-bg-primary overflow-hidden">
       {/* Top Banner indicating Reconnection */}
@@ -90,8 +83,11 @@ export default function App() {
       </AnimatePresence>
 
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Sidebar (Desktop) */}
-        <div className="hidden md:flex w-80 flex-shrink-0 border-r border-border">
+        {/* Left Sidebar (Desktop + Tablet) & Fullscreen on Mobile (when chat hidden) */}
+        <div className={`
+          ${showMobileChat ? 'hidden md:flex' : 'flex'} 
+          w-full md:w-80 lg:w-96 flex-shrink-0 border-r border-border
+        `}>
           <div className="flex-1 w-full min-w-0">
             <ChatsSidebar
               activeChat={activeChatId}
@@ -101,8 +97,11 @@ export default function App() {
           </div>
         </div>
 
-        {/* Main Chat Area */}
-        <div className="flex-1 min-w-0 flex flex-col bg-bg-primary relative shadow-[-10px_0_15px_-3px_rgba(0,0,0,0.2)] z-10">
+        {/* Main Chat Area - Hidden on mobile if showMobileChat is false */}
+        <div className={`
+          ${!showMobileChat ? 'hidden md:flex' : 'flex'} 
+          flex-1 min-w-0 flex-col bg-bg-primary relative shadow-[-10px_0_15px_-3px_rgba(0,0,0,0.2)] z-10
+        `}>
           {/* Header Theme Toggle (temporarily placed here for global access) */}
           <div className="absolute top-4 right-4 z-20">
             <button
@@ -122,42 +121,14 @@ export default function App() {
             <ChatArea
               chatMode={activeChatId.startsWith('room:') ? 'room' : (activeChatId.startsWith('user:') ? 'private' : 'global')}
               privateChatUserId={activeChatId.startsWith('user:') ? parseInt(activeChatId.replace('user:', '')) : null}
+              onBack={() => setShowMobileChat(false)}
             />
           </div>
         </div>
       </div>
 
-      {/* Mobile Bottom Tabs */}
-      <div className="md:hidden flex border-t border-border bg-bg-secondary shrink-0">
-        <button
-          onClick={() => setMobileTab('chatsList')}
-          className={`flex-1 py-3 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer border-r border-border
-              ${mobileTab === 'chatsList' ? 'text-accent bg-bg-hover' : 'text-text-dim'}`}
-        >
-          Chats List
-        </button>
-        <button
-          onClick={() => setMobileTab('chat')}
-          className={`flex-1 py-3 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer
-              ${mobileTab === 'chat' ? 'text-accent bg-bg-hover' : 'text-text-dim'}`}
-        >
-          Current Chat
-        </button>
-      </div>
-
-      <AnimatePresence>
-        {mobileTab === 'chatsList' && (
-          <motion.div
-            initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="md:hidden fixed inset-0 bottom-[49px] z-40 bg-bg-secondary"
-          >
-            <ChatsSidebar activeChat={activeChatId} onSelectChat={handleSelectChat} onOpenProfile={() => setShowProfile(true)} />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <ProfileModal open={showProfile} onClose={() => setShowProfile(false)} />
+      <UserProfileModal />
       <Toast />
     </div>
   );
