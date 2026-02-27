@@ -7,7 +7,7 @@
   <img src="https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white" />
 </p>
 
-<h1 align="center">💬 chatApp</h1>
+<h1 align="center">💬 ChatLo.io</h1>
 
 <p align="center">
   A full-stack real-time chat application built with <strong>WebSockets</strong>, <strong>React</strong>, and <strong>Node.js</strong>.<br/>
@@ -55,8 +55,8 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/qzMalekuz/chatApp_using_ws.git
-cd chatApp_using_ws
+git clone https://github.com/qzMalekuz/ChatLo.io.git
+cd ChatLo.io
 
 # Install backend dependencies
 cd BE && npm install
@@ -90,7 +90,7 @@ Open **http://localhost:5173** in your browser to start chatting.
 ## 📁 Project Structure
 
 ```
-chatApp/
+ChatLo.io/
 ├── README.md
 ├── .gitignore
 │
