@@ -215,6 +215,93 @@ function LocationMessage({ lat, lng }: { lat: number; lng: number }) {
     );
 }
 
+// Detect invite pattern: "📢 You've been invited to join group: #roomname"
+const INVITE_REGEX = /📢 You've been invited to join group: #([\w\-]+)/;
+
+function InviteCard({
+    roomName, isSelf, timestamp, onJoin,
+}: {
+    roomName: string; isSelf: boolean; timestamp: string; onJoin: (room: string) => void;
+}) {
+    const [dismissed, setDismissed] = useState(false);
+    const [joined, setJoined] = useState(false);
+
+    if (isSelf) {
+        // Sender sees a compact sent-invite pill
+        return (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-bg-input border border-border text-[13px] text-text-dim">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="flex-shrink-0">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+                </svg>
+                <span>Invited to <span className="text-text-primary font-medium">#{roomName}</span></span>
+                <span className="ml-auto text-[10px]">{new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+            </div>
+        );
+    }
+
+    if (dismissed) {
+        return (
+            <p className="text-[11px] text-text-dim px-1">Group invite dismissed</p>
+        );
+    }
+
+    if (joined) {
+        return (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-success/10 border border-success/30 text-[13px] text-success">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                </svg>
+                Joined <span className="font-semibold">#{roomName}</span>
+            </div>
+        );
+    }
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}
+            className="rounded-2xl border border-border bg-bg-card p-4 min-w-[220px] max-w-[280px]"
+        >
+            {/* Icon + title */}
+            <div className="flex items-center gap-2.5 mb-3">
+                <div className="w-9 h-9 rounded-xl bg-bg-input flex items-center justify-center flex-shrink-0">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-accent">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                </div>
+                <div>
+                    <p className="text-[11px] text-text-dim uppercase tracking-wider font-semibold">Group Invite</p>
+                    <p className="text-sm font-semibold text-text-primary">#{roomName}</p>
+                </div>
+            </div>
+
+            {/* Timestamp */}
+            <p className="text-[10.5px] text-text-dim mb-3">
+                {new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </p>
+
+            {/* Actions */}
+            <div className="flex gap-2">
+                <motion.button
+                    whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                    onClick={() => { setDismissed(true); }}
+                    className="flex-1 py-2 rounded-xl border border-border text-text-muted text-xs font-medium hover:bg-bg-hover cursor-pointer transition-colors"
+                >
+                    Dismiss
+                </motion.button>
+                <motion.button
+                    whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                    onClick={() => { setJoined(true); onJoin(roomName); }}
+                    className="flex-1 py-2 rounded-xl bg-accent text-bg-primary text-xs font-semibold hover:bg-accent-hover cursor-pointer transition-colors"
+                >
+                    Join Group
+                </motion.button>
+            </div>
+        </motion.div>
+    );
+}
+
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function ChatArea({ chatMode, privateChatUserId, onBack }: Props) {
     const {
@@ -223,7 +310,7 @@ export default function ChatArea({ chatMode, privateChatUserId, onBack }: Props)
         sendVoiceChat, sendRoomVoice, sendPrivateVoice,
         sendTypingStart, sendTypingStop, typingUsers, onlineUsers,
         mutedChats, toggleMute, setSelectedUserProfile, addLocalMessage,
-        currentUser,
+        joinRoom, currentUser,
     } = useChatContext();
 
     const [input, setInput] = useState('');
@@ -533,30 +620,37 @@ export default function ChatArea({ chatMode, privateChatUserId, onBack }: Props)
                                             <span className="text-xs font-medium text-text-primary">{msg.username}</span>
                                         </div>
                                     )}
-                                    {/* Rich media renderers */}
-                                    {msg.audioUrl ? (
-                                        <AudioMessage url={msg.audioUrl} />
-                                    ) : msg.imageUrl ? (
-                                        <ImageMessage url={msg.imageUrl} />
-                                    ) : msg.videoUrl ? (
-                                        <VideoMessage url={msg.videoUrl} />
-                                    ) : msg.fileInfo ? (
-                                        <FileMessage name={msg.fileInfo.name} size={msg.fileInfo.size} />
-                                    ) : msg.pollData ? (
-                                        <PollMessage data={msg.pollData} isSelf={msg.isSelf} />
-                                    ) : msg.locationData ? (
-                                        <LocationMessage lat={msg.locationData.lat} lng={msg.locationData.lng} />
-                                    ) : (
-                                        <div className={`px-4 py-2.5 rounded-2xl text-[15px] leading-relaxed break-words shadow-sm
-                                            ${msg.isSelf ? 'bg-self-bubble text-text-primary rounded-br-[4px]' : 'bg-other-bubble text-text-primary rounded-bl-[4px] border border-border'}`}>
-                                            {msg.text}
-                                            <div className={`flex justify-end items-center gap-1 mt-1 -mb-1 ${msg.isSelf ? 'text-text-muted/70' : 'text-text-dim'}`}>
-                                                <span className="text-[10.5px]">
-                                                    {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </span>
+                                    {/* Rich media content */}
+                                    {(() => {
+                                        if (msg.audioUrl) return <AudioMessage url={msg.audioUrl} />;
+                                        if (msg.imageUrl) return <ImageMessage url={msg.imageUrl} />;
+                                        if (msg.videoUrl) return <VideoMessage url={msg.videoUrl} />;
+                                        if (msg.fileInfo) return <FileMessage name={msg.fileInfo.name} size={msg.fileInfo.size} />;
+                                        if (msg.pollData) return <PollMessage data={msg.pollData} isSelf={msg.isSelf} />;
+                                        if (msg.locationData) return <LocationMessage lat={msg.locationData.lat} lng={msg.locationData.lng} />;
+                                        const inviteMatch = INVITE_REGEX.exec(msg.text);
+                                        if (inviteMatch) {
+                                            return (
+                                                <InviteCard
+                                                    roomName={inviteMatch[1]}
+                                                    isSelf={msg.isSelf}
+                                                    timestamp={msg.timestamp}
+                                                    onJoin={joinRoom}
+                                                />
+                                            );
+                                        }
+                                        return (
+                                            <div className={`px-4 py-2.5 rounded-2xl text-[15px] leading-relaxed break-words shadow-sm
+                                                ${msg.isSelf ? 'bg-self-bubble text-text-primary rounded-br-[4px]' : 'bg-other-bubble text-text-primary rounded-bl-[4px] border border-border'}`}>
+                                                {msg.text}
+                                                <div className={`flex justify-end items-center gap-1 mt-1 -mb-1 ${msg.isSelf ? 'text-text-muted/70' : 'text-text-dim'}`}>
+                                                    <span className="text-[10.5px]">
+                                                        {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </span>
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
+                                        );
+                                    })()}
                                 </div>
                             )}
                         </motion.div>
