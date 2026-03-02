@@ -8,6 +8,7 @@ import {
     RoomJoinPayload,
     TypingPayload,
     RoomMembersPayload,
+    VoiceChatPayload,
 } from "../types";
 import { findUserByWs, getPublicUserList } from "../services/userService";
 import { broadcast, sendPrivateMessage } from "../services/chatService";
@@ -154,6 +155,44 @@ export function handleMessage(ws: WebSocket, raw: string): void {
                 type: "TYPING_STOP",
                 payload: { id: sender.id, username: sender.username, room: target },
             });
+            break;
+        }
+
+        case "VOICE_CHAT": {
+            const { audioData, duration } = payload as VoiceChatPayload;
+            if (!audioData || typeof audioData !== 'string') return sendError(ws, "Missing audio data");
+            if (audioData.length > 2_000_000) return sendError(ws, "Audio too large (max ~1.5MB)");
+            if (!audioData.startsWith('data:audio')) return sendError(ws, "Invalid audio format");
+
+            broadcast({
+                type: "VOICE_CHAT",
+                payload: { id: sender.id, username: sender.username, audioData, duration: duration ?? 0, timestamp },
+            });
+            break;
+        }
+
+        case "ROOM_VOICE": {
+            const { audioData, duration } = payload as VoiceChatPayload;
+            if (!audioData || typeof audioData !== 'string') return sendError(ws, "Missing audio data");
+            if (audioData.length > 2_000_000) return sendError(ws, "Audio too large (max ~1.5MB)");
+            if (!audioData.startsWith('data:audio')) return sendError(ws, "Invalid audio format");
+            if (!sender.room) return sendError(ws, "Join a room first");
+
+            broadcastToRoom(sender.room, {
+                type: "ROOM_VOICE",
+                payload: { id: sender.id, username: sender.username, audioData, duration: duration ?? 0, timestamp },
+            });
+            break;
+        }
+
+        case "PRIVATE_VOICE": {
+            const { to, audioData, duration } = payload as VoiceChatPayload;
+            if (!audioData || typeof audioData !== 'string') return sendError(ws, "Missing audio data");
+            if (audioData.length > 2_000_000) return sendError(ws, "Audio too large (max ~1.5MB)");
+            if (!audioData.startsWith('data:audio')) return sendError(ws, "Invalid audio format");
+            if (!to) return sendError(ws, "Missing 'to'");
+
+            sendPrivateMessage(sender, to, `🎤 Voice message`, audioData, duration ?? 0);
             break;
         }
 

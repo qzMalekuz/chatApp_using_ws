@@ -64,6 +64,7 @@
   scrollbar-width: thin;
   scrollbar-color: #2a2a30 transparent;
   box-sizing: border-box;
+  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out, border-color 0.3s ease-in-out;
 }
 
 body {

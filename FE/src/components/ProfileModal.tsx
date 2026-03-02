@@ -21,7 +21,7 @@ function timeAgo(iso: string): string {
 export default function ProfileModal({ open, onClose }: Props) {
     const {
         currentUser, userProfile, connected, currentRoom, onlineUsers,
-        setUsername, setUserStatus, setUserAvatar,
+        setUsername, setUserStatus, setUserAvatar, setUserBanner,
     } = useChatContext();
 
     const [editingName, setEditingName] = useState(false);
@@ -29,9 +29,10 @@ export default function ProfileModal({ open, onClose }: Props) {
     const [editingStatus, setEditingStatus] = useState(false);
     const [statusInput, setStatusInput] = useState('');
     const [joinedAgo, setJoinedAgo] = useState('');
+    const [bannerHovered, setBannerHovered] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const bannerInputRef = useRef<HTMLInputElement>(null);
 
-    // Keep "joined ago" text updated
     useEffect(() => {
         if (!open) return;
         const update = () => setJoinedAgo(timeAgo(userProfile.joinedAt));
@@ -58,6 +59,14 @@ export default function ProfileModal({ open, onClose }: Props) {
         if (file && file.type.startsWith('image/')) {
             const url = URL.createObjectURL(file);
             setUserAvatar(url);
+        }
+    };
+
+    const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file && file.type.startsWith('image/')) {
+            const url = URL.createObjectURL(file);
+            setUserBanner(url);
         }
     };
 
@@ -96,12 +105,55 @@ export default function ProfileModal({ open, onClose }: Props) {
                         onClick={(e) => e.stopPropagation()}
                         className="relative w-full max-w-sm bg-bg-secondary border border-border rounded-2xl overflow-hidden shadow-2xl"
                     >
-                        {/* Banner / Header gradient */}
-                        <div className="h-24 bg-gradient-to-br from-[#2a2a3a] via-[#1e1e2e] to-[#2e2e3e] relative">
+                        {/* ── Banner ──────────────────────────────────────── */}
+                        <div
+                            className="h-28 relative group overflow-hidden"
+                            onMouseEnter={() => setBannerHovered(true)}
+                            onMouseLeave={() => setBannerHovered(false)}
+                        >
+                            {userProfile.bannerUrl ? (
+                                <motion.img
+                                    key={userProfile.bannerUrl}
+                                    initial={{ opacity: 0, scale: 1.05 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ duration: 0.4 }}
+                                    src={userProfile.bannerUrl}
+                                    alt="banner"
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <div className="w-full h-full bg-gradient-to-br from-[#1e1e3a] via-[#252535] to-[#1a1a2e]
+                                    after:absolute after:inset-0 after:bg-gradient-to-t after:from-bg-secondary/60 after:via-transparent after:to-transparent" />
+                            )}
+
+                            {/* Edit Banner Overlay */}
+                            <AnimatePresence>
+                                {bannerHovered && (
+                                    <motion.button
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        onClick={() => bannerInputRef.current?.click()}
+                                        className="absolute inset-0 flex items-center justify-center bg-black/40 cursor-pointer"
+                                    >
+                                        <div className="flex flex-col items-center gap-1.5 text-white/90">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                                                <circle cx="12" cy="13" r="4" />
+                                            </svg>
+                                            <span className="text-xs font-medium">Edit Banner</span>
+                                        </div>
+                                    </motion.button>
+                                )}
+                            </AnimatePresence>
+
+                            <input ref={bannerInputRef} type="file" accept="image/*" className="hidden" onChange={handleBannerChange} />
+
+                            {/* Close Button */}
                             <button
                                 onClick={onClose}
                                 className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/30 flex items-center justify-center
-                                  text-text-muted hover:text-text-primary hover:bg-black/50 transition-all cursor-pointer"
+                                  text-white/70 hover:text-white hover:bg-black/50 transition-all cursor-pointer z-10"
                             >
                                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                                     <path d="M1 1L13 13M1 13L13 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -109,52 +161,58 @@ export default function ProfileModal({ open, onClose }: Props) {
                             </button>
 
                             {/* Connection badge */}
-                            <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2 py-1 rounded-full bg-black/30 text-[10px] font-medium">
+                            <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/30 backdrop-blur-sm text-[10px] font-semibold z-10">
                                 <div className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-success' : 'bg-error'}`} />
                                 <span className={connected ? 'text-success' : 'text-error'}>
                                     {connected ? 'Online' : 'Offline'}
                                 </span>
                             </div>
+
+                            {/* Remove banner option */}
+                            {userProfile.bannerUrl && (
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setUserBanner(null); }}
+                                    className="absolute bottom-2 right-2 text-[10px] text-white/60 hover:text-white/90 bg-black/30 px-2 py-0.5 rounded-full cursor-pointer z-10 transition-colors"
+                                >
+                                    Remove
+                                </button>
+                            )}
                         </div>
 
-                        {/* Avatar overlapping banner */}
-                        <div className="px-6 -mt-12">
-                            <div
-                                className="relative w-20 h-20 group cursor-pointer"
+                        {/* ── Avatar overlapping banner ───────────────────── */}
+                        <div className="px-5 -mt-10 flex items-end justify-between">
+                            <motion.div
+                                className="relative w-20 h-20 group cursor-pointer flex-shrink-0"
+                                whileHover={{ scale: 1.03 }}
                                 onClick={() => fileInputRef.current?.click()}
                             >
                                 {userProfile.avatarUrl ? (
                                     <img
                                         src={userProfile.avatarUrl}
                                         alt="avatar"
-                                        className="w-20 h-20 rounded-full object-cover border-4 border-bg-secondary"
+                                        className="w-20 h-20 rounded-full object-cover border-4 border-bg-secondary shadow-lg"
                                     />
                                 ) : (
                                     <div className="w-20 h-20 rounded-full border-4 border-bg-secondary bg-gradient-to-br from-[#3a3a4a] to-[#2a2a3a]
-                                      flex items-center justify-center text-2xl font-bold text-text-primary">
+                                      flex items-center justify-center text-2xl font-bold text-text-primary shadow-lg">
                                         {initial}
                                     </div>
                                 )}
-                                {/* Hover overlay */}
+                                {/* Camera overlay */}
                                 <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center
                                   opacity-0 group-hover:opacity-100 transition-opacity border-4 border-transparent">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
                                         <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
                                         <circle cx="12" cy="13" r="4" />
                                     </svg>
                                 </div>
-                                <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    accept="image/*"
-                                    className="hidden"
-                                    onChange={handleAvatarChange}
-                                />
-                            </div>
+                                <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+                            </motion.div>
                         </div>
 
-                        <div className="px-6 pb-6 pt-3 space-y-5">
-                            {/* Username */}
+                        {/* ── Body ────────────────────────────────────────── */}
+                        <div className="px-5 pb-5 pt-3 space-y-4">
+                            {/* Username + ID */}
                             <div>
                                 {editingName ? (
                                     <div className="flex items-center gap-2">
@@ -172,16 +230,19 @@ export default function ProfileModal({ open, onClose }: Props) {
                                     </div>
                                 ) : (
                                     <div className="flex items-center gap-2">
-                                        <h2 className="text-lg font-semibold text-text-primary">{currentUser.username}</h2>
-                                        <button
+                                        <h2 className="text-lg font-bold text-text-primary leading-tight">{currentUser.username}</h2>
+                                        <motion.button
+                                            whileHover={{ scale: 1.15 }}
+                                            whileTap={{ scale: 0.9 }}
                                             onClick={() => { setNameInput(currentUser.username); setEditingName(true); }}
                                             className="text-text-dim hover:text-text-muted transition-colors cursor-pointer"
+                                            aria-label="Edit username"
                                         >
                                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                                                 <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
                                                 <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
                                             </svg>
-                                        </button>
+                                        </motion.button>
                                     </div>
                                 )}
                                 <p className="text-text-dim text-xs mt-0.5">ID: {currentUser.id}</p>
@@ -206,7 +267,7 @@ export default function ProfileModal({ open, onClose }: Props) {
                                             {quickStatuses.map(qs => (
                                                 <button
                                                     key={qs}
-                                                    onClick={() => { setStatusInput(qs); }}
+                                                    onClick={() => setStatusInput(qs)}
                                                     className="px-2 py-1 rounded-md bg-bg-hover text-[11px] text-text-muted
                                                       hover:bg-bg-card hover:text-text-primary transition-colors cursor-pointer"
                                                 >
@@ -223,7 +284,7 @@ export default function ProfileModal({ open, onClose }: Props) {
                                     <button
                                         onClick={() => { setStatusInput(userProfile.status); setEditingStatus(true); }}
                                         className="w-full text-left px-3 py-2 rounded-lg bg-bg-card border border-border
-                                          text-sm hover:border-text-dim transition-colors cursor-pointer group"
+                                          text-sm hover:border-text-dim transition-colors cursor-pointer"
                                     >
                                         {userProfile.status ? (
                                             <span className="text-text-muted">{userProfile.status}</span>
@@ -249,8 +310,7 @@ export default function ProfileModal({ open, onClose }: Props) {
                                 <div className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-bg-card border border-border">
                                     <div className="flex items-center gap-2">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-text-dim">
-                                            <circle cx="12" cy="12" r="10" />
-                                            <polyline points="12 6 12 12 16 14" />
+                                            <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
                                         </svg>
                                         <span className="text-xs text-text-muted">Joined</span>
                                     </div>
@@ -261,8 +321,7 @@ export default function ProfileModal({ open, onClose }: Props) {
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-text-dim">
                                             <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2" />
                                             <circle cx="9" cy="7" r="4" />
-                                            <path d="M23 21v-2a4 4 0 00-3-3.87" />
-                                            <path d="M16 3.13a4 4 0 010 7.75" />
+                                            <path d="M23 21v-2a4 4 0 00-3-3.87" /><path d="M16 3.13a4 4 0 010 7.75" />
                                         </svg>
                                         <span className="text-xs text-text-muted">Current Room</span>
                                     </div>
@@ -272,7 +331,7 @@ export default function ProfileModal({ open, onClose }: Props) {
                                 </div>
                             </div>
 
-                            {/* Remove avatar button */}
+                            {/* Remove avatar */}
                             {userProfile.avatarUrl && (
                                 <button
                                     onClick={() => setUserAvatar(null)}

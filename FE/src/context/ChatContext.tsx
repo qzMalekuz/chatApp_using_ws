@@ -30,8 +30,10 @@ interface ChatState {
     dismissError: (index: number) => void;
     setUserStatus: (status: string) => void;
     setUserAvatar: (url: string | null) => void;
+    setUserBanner: (url: string | null) => void;
     toggleMute: (chatId: string) => void;
     setSelectedUserProfile: (userId: number | null) => void;
+    addLocalMessage: (chatId: string, msg: import('../types').ChatMessage) => void;
 }
 
 const ChatContext = createContext<ChatState | null>(null);
@@ -64,6 +66,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     const [userProfile, setUserProfile] = useState<UserProfile>({
         status: '',
         avatarUrl: null,
+        bannerUrl: null,
         joinedAt: new Date().toISOString(),
         messagesSent: 0,
     });
@@ -312,6 +315,20 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         setUserProfile(prev => ({ ...prev, avatarUrl: url }));
         sendMessage('UPDATE_PROFILE', { avatarUrl: url });
     }, [sendMessage]);
+    const setUserBanner = useCallback((url: string | null) => {
+        setUserProfile(prev => ({ ...prev, bannerUrl: url }));
+    }, []);
+    const addLocalMessage = useCallback((chatId: string, msg: import('../types').ChatMessage) => {
+        if (chatId === 'global') {
+            setGlobalMessages(prev => [...prev, msg]);
+        } else if (chatId.startsWith('room:')) {
+            const room = chatId.replace('room:', '');
+            setRoomMessages(prev => ({ ...prev, [room]: [...(prev[room] || []), msg] }));
+        } else if (chatId.startsWith('user:')) {
+            const uid = parseInt(chatId.replace('user:', ''));
+            setPrivateMessages(prev => ({ ...prev, [uid]: [...(prev[uid] || []), msg] }));
+        }
+    }, []);
     const toggleMute = useCallback((chatId: string) => {
         setMutedChats(prev => prev.includes(chatId) ? prev.filter(id => id !== chatId) : [...prev, chatId]);
     }, []);
@@ -322,7 +339,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             globalMessages, privateMessages, roomMessages, currentRoom, roomMembers,
             typingUsers, errors, mutedChats, selectedUserIdForProfile, sendMessage, setUsername, sendChat, sendPrivateChat,
             joinRoom, leaveRoom, sendRoomChat, sendTypingStart, sendTypingStop,
-            requestUsers, requestRoomMembers, dismissError, setUserStatus, setUserAvatar, toggleMute, setSelectedUserProfile,
+            requestUsers, requestRoomMembers, dismissError, setUserStatus, setUserAvatar, setUserBanner, toggleMute, setSelectedUserProfile, addLocalMessage,
         }}>
             {children}
         </ChatContext.Provider>

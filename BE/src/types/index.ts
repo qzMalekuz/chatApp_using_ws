@@ -49,3 +49,9 @@ export interface TypingPayload {
 export interface RoomMembersPayload {
     room?: string;
 }
+
+export interface VoiceChatPayload {
+    audioData?: string;  // base64-encoded audio
+    to?: number;         // for private voice
+    duration?: number;   // seconds
+}

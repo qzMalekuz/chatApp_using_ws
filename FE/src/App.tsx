@@ -40,7 +40,7 @@ export default function App() {
       const roomName = id.replace('room:', '');
       if (currentRoom !== roomName) joinRoom(roomName);
     }
-    setShowMobileChat(true); // Slide in chat on mobile
+    setShowMobileChat(true);
   };
 
   if (!currentUser) {
@@ -57,8 +57,7 @@ export default function App() {
         <UsernameModal onComplete={() => setUsernameSet(true)} />
         <button
           onClick={() => setUsernameSet(true)}
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 text-text-dim text-xs hover:text-text-muted z-50
-            transition-colors cursor-pointer"
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 text-text-dim text-xs hover:text-text-muted z-50 transition-colors cursor-pointer"
         >
           Continue as {currentUser.username}
         </button>
@@ -102,19 +101,48 @@ export default function App() {
           ${!showMobileChat ? 'hidden md:flex' : 'flex'} 
           flex-1 min-w-0 flex-col bg-bg-primary relative shadow-[-10px_0_15px_-3px_rgba(0,0,0,0.2)] z-10
         `}>
-          {/* Header Theme Toggle (temporarily placed here for global access) */}
-          <div className="absolute top-4 right-4 z-20">
-            <button
+          {/* Header: Theme Toggle — perfectly centered */}
+          <div className="absolute top-3 right-3 z-20 flex items-center justify-center">
+            <motion.button
               onClick={toggleTheme}
-              className="w-10 h-10 rounded-full bg-bg-card border border-border flex items-center justify-center text-text-dim hover:text-text-primary transition-colors cursor-pointer shadow-lg"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.88 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+              className="w-10 h-10 rounded-full bg-bg-card border border-border flex items-center justify-center text-text-dim hover:text-text-primary cursor-pointer shadow-lg"
               title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              aria-label="Toggle theme"
             >
-              {theme === 'dark' ? (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5" /><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" /></svg>
-              ) : (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
-              )}
-            </button>
+              <AnimatePresence mode="wait" initial={false}>
+                {theme === 'dark' ? (
+                  <motion.span
+                    key="sun"
+                    initial={{ rotate: -90, opacity: 0, scale: 0.5 }}
+                    animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                    exit={{ rotate: 90, opacity: 0, scale: 0.5 }}
+                    transition={{ duration: 0.25, ease: 'easeInOut' }}
+                    className="flex items-center justify-center"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="5" />
+                      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                    </svg>
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="moon"
+                    initial={{ rotate: 90, opacity: 0, scale: 0.5 }}
+                    animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                    exit={{ rotate: -90, opacity: 0, scale: 0.5 }}
+                    transition={{ duration: 0.25, ease: 'easeInOut' }}
+                    className="flex items-center justify-center"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                    </svg>
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </motion.button>
           </div>
 
           <div className="flex-1 min-h-0 relative">

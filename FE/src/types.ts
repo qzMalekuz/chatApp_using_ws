@@ -6,6 +6,13 @@ export interface ChatMessage {
     text: string;
     timestamp: string;
     isSelf: boolean;
+    // Rich media extensions (local-only optimistic messages)
+    audioUrl?: string;
+    imageUrl?: string;
+    videoUrl?: string;
+    fileInfo?: { name: string; size: string };
+    pollData?: { question: string; options: string[]; votes: number[] };
+    locationData?: { lat: number; lng: number };
 }
 
 export interface OnlineUser {
@@ -18,6 +25,7 @@ export interface OnlineUser {
 export interface UserProfile {
     status: string;
     avatarUrl: string | null;
+    bannerUrl: string | null;
     joinedAt: string;
     messagesSent: number;
 }
