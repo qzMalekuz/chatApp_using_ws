@@ -7,7 +7,7 @@
   <img src="https://img.shields.io/badge/Framer_Motion-EF008F?style=for-the-badge&logo=framer&logoColor=white" />
 </p>
 
-<h1 align="center">💬 ChatLo.io</h1>
+<h1 align="center">ChatLo.io</h1>
 
 <p align="center">
   A full-stack real-time chat application built with <strong>WebSockets</strong>, <strong>React</strong>, and <strong>Node.js</strong>.<br/>
@@ -25,49 +25,49 @@
 
 ---
 
-## ✨ Features
+## Features
 
-### 💬 Messaging
+### Messaging
 | Feature | Description |
 |---------|-------------|
-| 🌐 **Global Chat** | Broadcast messages to all connected users |
-| 🔒 **Private / Secret Chat** | Direct messages between two users, selectable from the compose menu |
-| 🎤 **Voice Messages** | Record and send audio notes in global, room, or private chats — both sides get a live audio player |
-| 📎 **Rich Attachments** | Send images, videos, files, polls, and GPS location pins |
-| 📷 **Live Camera Capture** | Open device camera via `getUserMedia`, preview the feed, capture a photo, and send it |
-| 😄 **Emoji Picker** | Built-in emoji panel with smooth animation |
-| ✍️ **Typing Indicators** | Real-time "user is typing…" per room with animated dots |
+| **Global Chat** | Broadcast messages to all connected users |
+| **Private / Secret Chat** | Direct messages between two users, selectable from the compose menu |
+| **Voice Messages** | Record and send audio notes in global, room, or private chats — both sides get a live audio player |
+| **Rich Attachments** | Send images, videos, files, polls, and GPS location pins |
+| **Live Camera Capture** | Open device camera via `getUserMedia`, preview the feed, capture a photo, and send it |
+| **Emoji Picker** | Built-in emoji panel with smooth animation |
+| **Typing Indicators** | Real-time "user is typing…" per room with animated dots |
 
-### 👥 Groups & Rooms
+### Groups & Rooms
 | Feature | Description |
 |---------|-------------|
-| 🏠 **Multiple Groups** | Join and stay in multiple rooms simultaneously — all shown independently in the sidebar |
-| ➕ **Two-step Group Creation** | Name your group → pick members to invite → create. Invited users receive an interactive invite card |
-| 📨 **Group Invites (Accept / Dismiss)** | Invite messages render as action cards with **Join Group** and **Dismiss** buttons |
-| ✕ **Per-room Leave** | Leave any individual room without affecting others |
+| **Multiple Groups** | Join and stay in multiple rooms simultaneously — all shown independently in the sidebar |
+| **Two-step Group Creation** | Name your group → pick members to invite → create. Invited users receive an interactive invite card |
+| **Group Invites (Accept / Dismiss)** | Invite messages render as action cards with **Join Group** and **Dismiss** buttons |
+| **Per-room Leave** | Leave any individual room without affecting others |
 
-### 🎨 UI / UX
+### UI / UX
 | Feature | Description |
 |---------|-------------|
-| 🌓 **Dark / Light Mode** | Smooth 300 ms CSS variable transition; preference persisted in `localStorage` |
-| 🖼️ **User Profiles** | Avatar (upload or URL), status, banner, and message count |
-| 🔔 **Mute Chats** | Mute any conversation from the header bell icon |
-| 🔍 **Sidebar Search** | Filter chats/users by name in real-time |
-| 📱 **Responsive** | Desktop three-column layout + mobile bottom-tab navigation |
-| ✨ **Framer Motion** | Page-level and per-message animations, modal transitions, dropdown fade-slides |
+| **Dark / Light Mode** | Smooth 300 ms CSS variable transition; preference persisted in `localStorage` |
+| **User Profiles** | Avatar (upload or URL), status, banner, and message count |
+| **Mute Chats** | Mute any conversation from the header bell icon |
+| **Sidebar Search** | Filter chats/users by name in real-time |
+| **Responsive** | Desktop three-column layout + mobile bottom-tab navigation |
+| **Framer Motion** | Page-level and per-message animations, modal transitions, dropdown fade-slides |
 
-### 🔧 Backend
+### Backend
 | Feature | Description |
 |---------|-------------|
-| 🛡️ **Rate Limiting** | Sliding-window throttle to prevent spam |
-| 🧹 **Input Sanitization** | Strips HTML, enforces length limits on text and audio (~1.5 MB cap) |
-| 💓 **Heartbeat** | Ping/pong to detect and clean up dead connections |
-| 🔐 **JWT Auth** | Optional token-based authentication on connection |
-| ⏱️ **Timestamps** | ISO timestamps on every message |
+| **Rate Limiting** | Sliding-window throttle to prevent spam |
+| **Input Sanitization** | Strips HTML, enforces length limits on text and audio (~1.5 MB cap) |
+| **Heartbeat** | Ping/pong to detect and clean up dead connections |
+| **JWT Auth** | Optional token-based authentication on connection |
+| **Timestamps** | ISO timestamps on every message |
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -162,7 +162,7 @@ ChatLo.io/
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 All backend settings live in `BE/.env`:
 
@@ -179,7 +179,7 @@ All backend settings live in `BE/.env`:
 
 ---
 
-## 📨 Message Types
+## Message Types
 
 All messages follow: `{ "type": "...", "payload": { ... } }`
 
@@ -221,7 +221,7 @@ All messages follow: `{ "type": "...", "payload": { ... } }`
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Backend
 | Technology | Role |
@@ -246,7 +246,7 @@ All messages follow: `{ "type": "...", "payload": { ... } }`
 
 ---
 
-## 📜 Scripts
+## Scripts
 
 ### Backend (`BE/`)
 
