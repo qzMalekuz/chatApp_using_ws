@@ -5,8 +5,13 @@ import { PORT, AUTH_ENABLED } from "./config";
 import { handleConnection } from "./handlers/connectionHandler";
 import { authenticateConnection } from "./middleware/auth";
 import { startHeartbeat } from "./middleware/heartbeat";
+import { httpRateLimiter, checkWsConnectionRateLimit } from "./middleware/rateLimiter";
 
 const app = express();
+
+// Apply HTTP rate limiting to all Express routes
+app.use(httpRateLimiter);
+
 const server = createServer(app);
 const wss = new WebSocketServer({ noServer: true });
 
@@ -15,6 +20,14 @@ app.get("/", (_req, res) => {
 });
 
 server.on("upgrade", (request, socket, head) => {
+    // Check connection rate limit based on IP
+    const ip = request.socket.remoteAddress || "unknown_ip";
+    if (checkWsConnectionRateLimit(ip)) {
+        socket.write("HTTP/1.1 429 Too Many Requests\r\n\r\n");
+        socket.destroy();
+        return;
+    }
+
     if (AUTH_ENABLED) {
         const authPayload = authenticateConnection(request);
 
