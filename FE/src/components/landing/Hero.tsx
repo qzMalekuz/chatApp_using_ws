@@ -13,7 +13,7 @@ const chatPreview = [
 
 export default function Hero({ onOpenChat }: HeroProps) {
   return (
-    <section className="relative overflow-hidden border-b border-gray-900" id="top">
+    <section className="landing-border relative overflow-hidden border-b" id="top">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -left-20 top-16 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
         <div className="absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-white/5 blur-3xl" />
@@ -26,20 +26,20 @@ export default function Hero({ onOpenChat }: HeroProps) {
           transition={{ duration: 0.55, ease: 'easeOut' }}
           className="max-w-xl"
         >
-          <p className="mb-4 inline-flex rounded-full border border-gray-700 px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-gray-300">
+          <p className="landing-border mb-4 inline-flex rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-[var(--landing-muted)]">
             Built for fast conversations
           </p>
-          <h1 className="text-balance text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl">
+          <h1 className="text-balance text-4xl font-semibold tracking-tight text-[var(--landing-text)] sm:text-5xl lg:text-6xl">
             Connect Instantly. Chat Seamlessly.
           </h1>
-          <p className="mt-6 text-lg leading-relaxed text-gray-300">
+          <p className="mt-6 text-lg leading-relaxed text-[var(--landing-muted)]">
             The fastest real-time chat platform built for developers and communities.
           </p>
 
           <div className="mt-10 flex flex-wrap items-center gap-4">
             <button
               onClick={onOpenChat}
-              className="rounded-full border border-white bg-white px-6 py-3 text-sm font-semibold text-black transition-all duration-200 hover:scale-[1.02] hover:bg-gray-200"
+              className="rounded-full border border-[var(--landing-text)] bg-[var(--landing-text)] px-6 py-3 text-sm font-semibold text-[var(--landing-bg)] transition-all duration-200 hover:scale-[1.02] hover:opacity-90"
             >
               Open Chat in Browser
             </button>
@@ -47,7 +47,7 @@ export default function Hero({ onOpenChat }: HeroProps) {
               href="https://github.com/qzMalekuz/ChatLo.io"
               target="_blank"
               rel="noreferrer"
-              className="rounded-full border border-gray-600 px-6 py-3 text-sm font-semibold text-white transition-all duration-200 hover:border-gray-400 hover:bg-white/5"
+              className="landing-border rounded-full border px-6 py-3 text-sm font-semibold text-[var(--landing-text)] transition-all duration-200 hover:opacity-80"
             >
               View on GitHub
             </a>
@@ -60,13 +60,13 @@ export default function Hero({ onOpenChat }: HeroProps) {
           transition={{ duration: 0.55, delay: 0.15, ease: 'easeOut' }}
           className="mx-auto w-full max-w-xl"
         >
-          <div className="rounded-3xl border border-gray-800 bg-[#060606] p-5 shadow-[0_20px_80px_rgba(255,255,255,0.06)]">
-            <div className="mb-4 flex items-center justify-between border-b border-gray-800 pb-4">
+          <div className="landing-border rounded-3xl border bg-[var(--landing-card)] p-5 shadow-[0_20px_80px_rgba(0,0,0,0.2)]">
+            <div className="landing-border mb-4 flex items-center justify-between border-b pb-4">
               <div>
-                <p className="text-sm font-semibold text-white"># global-room</p>
-                <p className="text-xs text-gray-400">12 users online</p>
+                <p className="text-sm font-semibold text-[var(--landing-text)]"># global-room</p>
+                <p className="text-xs text-[var(--landing-muted)]">12 users online</p>
               </div>
-              <span className="rounded-full border border-gray-700 px-3 py-1 text-[11px] text-gray-300">Live</span>
+              <span className="landing-border rounded-full border px-3 py-1 text-[11px] text-[var(--landing-muted)]">Live</span>
             </div>
 
             <div className="space-y-3">
@@ -78,15 +78,15 @@ export default function Hero({ onOpenChat }: HeroProps) {
                   transition={{ delay: index * 0.08 + 0.25 }}
                   className={`rounded-2xl border px-3 py-3 ${
                     message.self
-                      ? 'ml-auto max-w-[85%] border-gray-700 bg-gray-900'
-                      : 'max-w-[90%] border-gray-800 bg-black'
+                      ? 'landing-border ml-auto max-w-[85%] border bg-[var(--landing-surface)]'
+                      : 'landing-border max-w-[90%] border bg-[var(--landing-bg)]'
                   }`}
                 >
-                  <div className="mb-1 flex items-center gap-2 text-xs text-gray-400">
-                    <span className="font-medium text-gray-200">{message.user}</span>
+                  <div className="mb-1 flex items-center gap-2 text-xs text-[var(--landing-muted)]">
+                    <span className="font-medium text-[var(--landing-text)]">{message.user}</span>
                     <span>{message.time}</span>
                   </div>
-                  <p className="text-sm text-gray-100">{message.text}</p>
+                  <p className="text-sm text-[var(--landing-text)]">{message.text}</p>
                 </motion.div>
               ))}
             </div>

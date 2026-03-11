@@ -37,7 +37,7 @@ const features = [
 
 export default function Features() {
   return (
-    <section id="features" className="border-b border-gray-900 py-20 sm:py-24">
+    <section id="features" className="landing-border border-b py-20 sm:py-24">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 18 }}
@@ -46,8 +46,8 @@ export default function Features() {
           transition={{ duration: 0.5 }}
           className="max-w-2xl"
         >
-          <h2 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">Feature-rich, simple by default</h2>
-          <p className="mt-4 text-gray-400">
+          <h2 className="text-3xl font-semibold tracking-tight text-[var(--landing-text)] sm:text-4xl">Feature-rich, simple by default</h2>
+          <p className="mt-4 text-[var(--landing-muted)]">
             ChatLo.io keeps the interface clean while preserving everything developers need for real-time collaboration.
           </p>
         </motion.div>
@@ -60,15 +60,15 @@ export default function Features() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.25 }}
               transition={{ duration: 0.35, delay: index * 0.04 }}
-              className="group rounded-2xl border border-gray-800 bg-[#050505] p-6 shadow-[0_10px_40px_rgba(255,255,255,0.04)] transition-all duration-200 hover:border-gray-600 hover:translate-y-[-2px]"
+              className="landing-border group rounded-2xl border bg-[var(--landing-card)] p-6 shadow-[0_10px_40px_rgba(0,0,0,0.12)] transition-all duration-200 hover:translate-y-[-2px]"
             >
-              <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-700 bg-black text-gray-100">
+              <div className="landing-border mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl border bg-[var(--landing-bg)] text-[var(--landing-text)]">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5" aria-hidden="true">
                   {feature.icon}
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-white">{feature.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-gray-400">{feature.description}</p>
+              <h3 className="text-lg font-semibold text-[var(--landing-text)]">{feature.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-[var(--landing-muted)]">{feature.description}</p>
             </motion.article>
           ))}
         </div>

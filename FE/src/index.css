@@ -19,6 +19,12 @@
     --color-other-bubble: #1e1e26;
     --color-success: #34d399;
     --color-error: #f87171;
+    --landing-bg: #000000;
+    --landing-surface: #050505;
+    --landing-card: #0a0a0a;
+    --landing-text: #ffffff;
+    --landing-muted: #9ca3af;
+    --landing-border: #1f2937;
   }
 
   :root.light {
@@ -38,6 +44,12 @@
     --color-other-bubble: #ffffff;
     --color-success: #10b981;
     --color-error: #ef4444;
+    --landing-bg: #f5f5f7;
+    --landing-surface: #ffffff;
+    --landing-card: #ffffff;
+    --landing-text: #111114;
+    --landing-muted: #666677;
+    --landing-border: #d6d6dc;
   }
 }
 
@@ -58,6 +70,12 @@
   --color-other-bubble: var(--color-other-bubble);
   --color-success: var(--color-success);
   --color-error: var(--color-error);
+  --landing-bg: var(--landing-bg);
+  --landing-surface: var(--landing-surface);
+  --landing-card: var(--landing-card);
+  --landing-text: var(--landing-text);
+  --landing-muted: var(--landing-muted);
+  --landing-border: var(--landing-border);
 }
 
 * {
@@ -79,6 +97,10 @@ body {
 
 html {
   scroll-behavior: smooth;
+}
+
+.landing-border {
+  border-color: var(--landing-border);
 }
 
 ::selection {

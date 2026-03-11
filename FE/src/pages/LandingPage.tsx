@@ -8,12 +8,14 @@ import Footer from '../components/landing/Footer';
 
 interface LandingPageProps {
   onOpenChat: () => void;
+  theme: 'dark' | 'light';
+  onToggleTheme: () => void;
 }
 
-export default function LandingPage({ onOpenChat }: LandingPageProps) {
+export default function LandingPage({ onOpenChat, theme, onToggleTheme }: LandingPageProps) {
   return (
-    <div className="min-h-screen scroll-smooth bg-black text-white">
-      <Navbar onOpenChat={onOpenChat} />
+    <div className="min-h-screen scroll-smooth bg-[var(--landing-bg)] text-[var(--landing-text)]">
+      <Navbar onOpenChat={onOpenChat} theme={theme} onToggleTheme={onToggleTheme} />
       <main>
         <Hero onOpenChat={onOpenChat} />
         <Features />
@@ -21,7 +23,7 @@ export default function LandingPage({ onOpenChat }: LandingPageProps) {
         <DeveloperSection />
         <CTASection onOpenChat={onOpenChat} />
       </main>
-      <Footer onOpenChat={onOpenChat} />
+      <Footer />
     </div>
   );
 }
