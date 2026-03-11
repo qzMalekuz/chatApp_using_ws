@@ -77,6 +77,10 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 ::selection {
   background: #ffffff30;
   color: #fff;
