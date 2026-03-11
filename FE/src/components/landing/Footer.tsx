@@ -67,7 +67,7 @@ export default function Footer() {
             </a>
           </p>
           <p className="mt-3 text-sm text-[var(--landing-muted)]">
-            © 2026 ChatLo.io all rights reserved
+            © 2026 ChatLo.io - All Rights Reserved
           </p>
         </div>
       </div>
