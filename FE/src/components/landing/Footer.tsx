@@ -55,7 +55,18 @@ export default function Footer() {
 
         <div className="pt-8">
           <p className="text-base text-[var(--landing-muted)]">
-            Built and designed by <span className="font-semibold text-[var(--landing-text)]">Zafarr.</span>
+            Built and designed by{' '}
+            <a
+              href="https://zafarr.xyz/"
+              target="_blank"
+              rel="noreferrer"
+              className="font-semibold text-[var(--landing-text)] transition-opacity hover:opacity-80"
+            >
+              zafarr.
+            </a>
+          </p>
+          <p className="mt-3 text-sm text-[var(--landing-muted)]">
+            © 2026 ChatLo.io all rights reserved
           </p>
         </div>
       </div>

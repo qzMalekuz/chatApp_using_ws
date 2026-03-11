@@ -25,6 +25,8 @@
     --landing-text: #ffffff;
     --landing-muted: #9ca3af;
     --landing-border: #1f2937;
+    --selection-bg: #ffffff30;
+    --selection-text: #ffffff;
   }
 
   :root.light {
@@ -50,6 +52,8 @@
     --landing-text: #111114;
     --landing-muted: #666677;
     --landing-border: #d6d6dc;
+    --selection-bg: #11111433;
+    --selection-text: #111114;
   }
 }
 
@@ -76,6 +80,8 @@
   --landing-text: var(--landing-text);
   --landing-muted: var(--landing-muted);
   --landing-border: var(--landing-border);
+  --selection-bg: var(--selection-bg);
+  --selection-text: var(--selection-text);
 }
 
 * {
@@ -104,8 +110,8 @@ html {
 }
 
 ::selection {
-  background: #ffffff30;
-  color: #fff;
+  background: var(--selection-bg);
+  color: var(--selection-text);
 }
 
 input:focus,
