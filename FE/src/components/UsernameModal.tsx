@@ -69,7 +69,7 @@ export default function UsernameModal({ onComplete }: Props) {
 
                             <button
                                 onClick={handleSubmit}
-                                className="w-full py-3 rounded-xl bg-accent text-bg-primary font-semibold text-sm
+                                className="w-full min-h-11 py-3 rounded-xl bg-accent text-bg-primary font-semibold text-sm
                   hover:bg-accent-hover transition-colors duration-200 cursor-pointer"
                             >
                                 Join Chat

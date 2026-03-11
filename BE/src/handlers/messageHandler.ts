@@ -16,12 +16,20 @@ import { findUserByWs, getPublicUserList } from "../services/userService";
 import { broadcast, sendPrivateMessage } from "../services/chatService";
 import { joinRoom, leaveRoom, leaveAllRooms, broadcastToRoom, getRoomMembers } from "../services/roomService";
 import { sendError, sendJson } from "../utils/send";
-import { validateText, validateUsername } from "../utils/validate";
+import { validateAvatarUrl, validateRoomName, validateStatus, validateText, validateUsername } from "../utils/validate";
 import { isRateLimited } from "../utils/rateLimit";
+import { asSafeInteger, isValidEnvelope } from "../utils/messageSchema";
+import { MAX_RAW_MESSAGE_BYTES } from "../config";
 
 
 export function handleMessage(ws: WebSocket, raw: string): void {
-    let parsed: Message;
+    if (raw.length > MAX_RAW_MESSAGE_BYTES) {
+        sendError(ws, "Payload too large");
+        ws.close(1009, "Payload too large");
+        return;
+    }
+
+    let parsed: unknown;
 
     try {
         parsed = JSON.parse(raw);
@@ -29,14 +37,29 @@ export function handleMessage(ws: WebSocket, raw: string): void {
         return sendError(ws, "Invalid JSON");
     }
 
-    const { type, payload } = parsed;
+    if (!isValidEnvelope(parsed)) {
+        return sendError(ws, "Invalid message envelope");
+    }
+
+    const { type, payload } = parsed as Message;
     const sender = findUserByWs(ws);
 
     if (!sender) return sendError(ws, "User not found");
     if (!type || !payload) return sendError(ws, "Missing type or payload");
 
-    if (isRateLimited(sender)) {
+    if (isRateLimited(sender, type)) {
         return sendError(ws, "Rate limit exceeded. Please slow down.");
+    }
+
+    const messageId = (payload as { messageId?: unknown }).messageId;
+    if (typeof messageId === "string" && messageId.length <= 64) {
+        if (sender.recentMessageIds.includes(messageId)) {
+            return sendError(ws, "Duplicate message");
+        }
+        sender.recentMessageIds.push(messageId);
+        if (sender.recentMessageIds.length > 100) {
+            sender.recentMessageIds.shift();
+        }
     }
 
     const timestamp = new Date().toISOString();
@@ -72,8 +95,9 @@ export function handleMessage(ws: WebSocket, raw: string): void {
         case "UPDATE_PROFILE": {
             const { status, avatarUrl } = payload as UpdateProfilePayload;
 
-            if (status !== undefined) sender.status = String(status).substring(0, 100);
-            if (avatarUrl !== undefined) sender.avatarUrl = avatarUrl;
+            if (status !== undefined) sender.status = validateStatus(String(status));
+            const safeAvatarUrl = validateAvatarUrl(avatarUrl);
+            if (safeAvatarUrl !== undefined) sender.avatarUrl = safeAvatarUrl;
 
             broadcast({
                 type: "USER_UPDATED",
@@ -85,24 +109,28 @@ export function handleMessage(ws: WebSocket, raw: string): void {
         case "PRIVATE_CHAT": {
             const { to, text } = payload as PrivateChatPayload;
             const cleanText = validateText(text || "");
-            if (!to || !cleanText) return sendError(ws, "Missing 'to' or invalid message");
+            const targetId = asSafeInteger(to);
+            if (!targetId || !cleanText) return sendError(ws, "Missing 'to' or invalid message");
 
-            sendPrivateMessage(sender, to, cleanText);
+            sendPrivateMessage(sender, targetId, cleanText);
             break;
         }
 
         case "ROOM_JOIN": {
             const { room } = payload as RoomJoinPayload;
-            if (!room) return sendError(ws, "Room name required");
+            const safeRoom = validateRoomName(room || "");
+            if (!safeRoom) return sendError(ws, "Room name required");
 
-            joinRoom(sender, room);
+            joinRoom(sender, safeRoom);
             break;
         }
 
         case "ROOM_LEAVE": {
             const { room } = payload as RoomLeavePayload;
             if (room) {
-                leaveRoom(sender, room);
+                const safeRoom = validateRoomName(room);
+                if (!safeRoom) return sendError(ws, "Invalid room name");
+                leaveRoom(sender, safeRoom);
             } else {
                 leaveAllRooms(sender);
             }
@@ -115,7 +143,8 @@ export function handleMessage(ws: WebSocket, raw: string): void {
             if (!cleanText) return sendError(ws, "Invalid or empty message");
 
             // Use specified room or fall back to primary room
-            const targetRoom = room || sender.room;
+            const validatedRoom = room ? validateRoomName(room) : sender.room;
+            const targetRoom = validatedRoom || sender.room;
             if (!targetRoom) return sendError(ws, "Join a room first");
             if (!sender.rooms.includes(targetRoom)) return sendError(ws, "Not a member of that room");
 
@@ -136,18 +165,19 @@ export function handleMessage(ws: WebSocket, raw: string): void {
 
         case "ROOM_MEMBERS": {
             const { room } = payload as RoomMembersPayload;
-            if (!room) return sendError(ws, "Room name required");
+            const safeRoom = validateRoomName(room || "");
+            if (!safeRoom) return sendError(ws, "Room name required");
 
             sendJson(ws, {
                 type: "ROOM_MEMBERS",
-                payload: { room, members: getRoomMembers(room), timestamp },
+                payload: { room: safeRoom, members: getRoomMembers(safeRoom), timestamp },
             });
             break;
         }
 
         case "TYPING_START": {
             const { room } = payload as TypingPayload;
-            const target = room || sender.room;
+            const target = room ? validateRoomName(room) : sender.room;
             if (!target) return sendError(ws, "Specify a room or join one first");
 
             broadcastToRoom(target, {
@@ -159,7 +189,7 @@ export function handleMessage(ws: WebSocket, raw: string): void {
 
         case "TYPING_STOP": {
             const { room } = payload as TypingPayload;
-            const target = room || sender.room;
+            const target = room ? validateRoomName(room) : sender.room;
             if (!target) return sendError(ws, "Specify a room or join one first");
 
             broadcastToRoom(target, {
@@ -188,7 +218,7 @@ export function handleMessage(ws: WebSocket, raw: string): void {
             if (audioData.length > 2_000_000) return sendError(ws, "Audio too large (max ~1.5MB)");
             if (!audioData.startsWith('data:audio')) return sendError(ws, "Invalid audio format");
 
-            const targetRoom = room || sender.room;
+            const targetRoom = room ? validateRoomName(room) : sender.room;
             if (!targetRoom) return sendError(ws, "Join a room first");
             if (!sender.rooms.includes(targetRoom)) return sendError(ws, "Not a member of that room");
 
@@ -204,9 +234,10 @@ export function handleMessage(ws: WebSocket, raw: string): void {
             if (!audioData || typeof audioData !== 'string') return sendError(ws, "Missing audio data");
             if (audioData.length > 2_000_000) return sendError(ws, "Audio too large (max ~1.5MB)");
             if (!audioData.startsWith('data:audio')) return sendError(ws, "Invalid audio format");
-            if (!to) return sendError(ws, "Missing 'to'");
+            const targetId = asSafeInteger(to);
+            if (!targetId) return sendError(ws, "Missing 'to'");
 
-            sendPrivateMessage(sender, to, `🎤 Voice message`, audioData, duration ?? 0);
+            sendPrivateMessage(sender, targetId, `🎤 Voice message`, audioData, duration ?? 0);
             break;
         }
 

@@ -24,7 +24,7 @@ export default function Hero({ onOpenChat }: HeroProps) {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, ease: 'easeOut' }}
-          className="max-w-xl"
+          className="mx-auto max-w-xl text-center lg:mx-0 lg:text-left"
         >
           <p className="landing-border mb-4 inline-flex rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-[var(--landing-muted)]">
             Built for fast conversations
@@ -36,10 +36,10 @@ export default function Hero({ onOpenChat }: HeroProps) {
             The fastest real-time chat platform built for developers and communities.
           </p>
 
-          <div className="mt-10 flex flex-wrap items-center gap-4">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
             <button
               onClick={onOpenChat}
-              className="rounded-full border border-[var(--landing-text)] bg-[var(--landing-text)] px-6 py-3 text-sm font-semibold text-[var(--landing-bg)] transition-all duration-200 hover:scale-[1.02] hover:opacity-90"
+              className="min-h-11 rounded-full border border-[var(--landing-text)] bg-[var(--landing-text)] px-6 py-3 text-sm font-semibold text-[var(--landing-bg)] transition-all duration-200 hover:scale-[1.02] hover:opacity-90"
             >
               Open Chat in Browser
             </button>
@@ -47,7 +47,7 @@ export default function Hero({ onOpenChat }: HeroProps) {
               href="https://github.com/qzMalekuz/ChatLo.io"
               target="_blank"
               rel="noreferrer"
-              className="landing-border rounded-full border px-6 py-3 text-sm font-semibold text-[var(--landing-text)] transition-all duration-200 hover:opacity-80"
+              className="landing-border min-h-11 rounded-full border px-6 py-3 text-sm font-semibold text-[var(--landing-text)] transition-all duration-200 hover:opacity-80"
             >
               View on GitHub
             </a>

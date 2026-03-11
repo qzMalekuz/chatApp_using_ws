@@ -1,6 +1,7 @@
 import { IncomingMessage } from "http";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config";
+import { validateUsername } from "../utils/validate";
 
 export interface AuthPayload {
     username: string;
@@ -15,7 +16,9 @@ export function authenticateConnection(request: IncomingMessage): AuthPayload | 
         if (!token) return null;
 
         const decoded = jwt.verify(token, JWT_SECRET) as AuthPayload;
-        return decoded;
+        const username = validateUsername(String(decoded.username || ""));
+        if (!username) return null;
+        return { ...decoded, username };
     } catch {
         return null;
     }

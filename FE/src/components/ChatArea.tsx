@@ -695,13 +695,13 @@ export default function ChatArea({ chatMode, privateChatUserId, onBack }: Props)
     ];
 
     return (
-        <div className="h-full flex flex-col bg-bg-primary">
+        <div className="h-full min-h-0 flex flex-col bg-bg-primary">
             {/* Hidden file inputs */}
             <input ref={photoInputRef} type="file" accept="image/*,video/*" className="hidden" onChange={e => handleFileSelected(e, 'media')} />
             <input ref={fileInputRef} type="file" className="hidden" onChange={e => handleFileSelected(e, 'file')} />
 
             {/* ── Header ───────────────────────────────────────────────────── */}
-            <div className="px-6 py-3 border-b border-border bg-bg-secondary flex justify-between items-center shadow-sm z-10">
+            <div className="px-3 py-3 sm:px-6 border-b border-border bg-bg-secondary flex justify-between items-center shadow-sm z-10">
                 <div className="flex items-center gap-3">
                     {onBack && (
                         <button onClick={onBack} className="md:hidden w-8 h-8 rounded-full flex items-center justify-center -ml-2 text-text-dim hover:text-text-primary hover:bg-bg-input transition-colors shrink-0">
@@ -717,7 +717,7 @@ export default function ChatArea({ chatMode, privateChatUserId, onBack }: Props)
                 </div>
                 <button
                     onClick={() => toggleMute(currentChatId)}
-                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors cursor-pointer ${isMuted ? 'text-accent bg-bg-hover' : 'text-text-dim hover:text-text-primary hover:bg-bg-input'}`}
+                    className={`w-11 h-11 rounded-full flex items-center justify-center transition-colors cursor-pointer ${isMuted ? 'text-accent bg-bg-hover' : 'text-text-dim hover:text-text-primary hover:bg-bg-input'}`}
                     title={isMuted ? 'Unmute' : 'Mute'}
                 >
                     {isMuted ? (
@@ -729,7 +729,7 @@ export default function ChatArea({ chatMode, privateChatUserId, onBack }: Props)
             </div>
 
             {/* ── Messages ─────────────────────────────────────────────────── */}
-            <div ref={containerRef} className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
+            <div ref={containerRef} className="flex-1 overflow-y-auto px-3 py-4 sm:px-6 space-y-3">
                 {messages.length === 0 && <p className="text-text-dim text-sm text-center py-12">No messages yet</p>}
                 <AnimatePresence initial={false}>
                     {messages.map(msg => (
@@ -743,14 +743,14 @@ export default function ChatArea({ chatMode, privateChatUserId, onBack }: Props)
                             {msg.type === 'SYSTEM' || msg.type === 'ROOM_NOTIFICATION' ? (
                                 <p className="text-text-dim text-xs text-center w-full py-1">{msg.text}</p>
                             ) : (
-                                <div className="max-w-[70%]">
+                                <div className="max-w-[88%] sm:max-w-[78%] lg:max-w-[70%]">
                                     {!msg.isSelf && (
                                         <div className="flex items-center gap-2 mb-1 pl-1 cursor-pointer hover:opacity-80 transition-opacity w-fit"
                                             onClick={() => setSelectedUserProfile(msg.userId)}>
                                             <div className="w-5 h-5 rounded-full bg-accent flex items-center justify-center text-[10px] font-bold text-bg-primary flex-shrink-0">
                                                 {msg.username[0]?.toUpperCase()}
                                             </div>
-                                            <span className="text-xs font-medium text-text-primary">{msg.username}</span>
+                                            <span className="max-w-[160px] truncate text-xs font-medium text-text-primary sm:max-w-[220px]">{msg.username}</span>
                                         </div>
                                     )}
                                     {/* Rich media content */}
@@ -773,7 +773,7 @@ export default function ChatArea({ chatMode, privateChatUserId, onBack }: Props)
                                             );
                                         }
                                         return (
-                                            <div className={`px-4 py-2.5 rounded-2xl text-[15px] leading-relaxed break-words shadow-sm
+                                            <div className={`px-4 py-2.5 rounded-2xl text-[15px] leading-relaxed break-words [overflow-wrap:anywhere] shadow-sm
                                                 ${msg.isSelf ? 'bg-self-bubble text-text-primary rounded-br-[4px]' : 'bg-other-bubble text-text-primary rounded-bl-[4px] border border-border'}`}>
                                                 {msg.text}
                                                 <div className={`flex justify-end items-center gap-1 mt-1 -mb-1 ${msg.isSelf ? 'text-text-muted/70' : 'text-text-dim'}`}>
@@ -835,7 +835,7 @@ export default function ChatArea({ chatMode, privateChatUserId, onBack }: Props)
             </AnimatePresence>
 
             {/* ── Input Bar ─────────────────────────────────────────────────── */}
-            <div className="px-4 py-3 bg-bg-secondary border-t border-border">
+            <div className="px-3 py-3 bg-bg-secondary border-t border-border pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:px-4">
                 <div className="flex items-center gap-2 max-w-4xl mx-auto">
 
                     {/* Attachment Button */}
@@ -843,7 +843,7 @@ export default function ChatArea({ chatMode, privateChatUserId, onBack }: Props)
                         <motion.button
                             whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
                             onClick={() => { setShowAttachment(prev => !prev); setShowEmoji(false); }}
-                            className="w-10 h-10 rounded-full flex items-center justify-center text-text-dim hover:text-text-primary hover:bg-bg-hover transition-colors cursor-pointer"
+                            className="w-11 h-11 rounded-full flex items-center justify-center text-text-dim hover:text-text-primary hover:bg-bg-hover transition-colors cursor-pointer"
                         >
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
@@ -892,7 +892,7 @@ export default function ChatArea({ chatMode, privateChatUserId, onBack }: Props)
                         <div className="relative flex-shrink-0 pr-2" ref={emojiRef}>
                             <motion.button whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}
                                 onClick={() => { setShowEmoji(prev => !prev); setShowAttachment(false); }}
-                                className="w-8 h-8 flex items-center justify-center text-text-dim hover:text-text-primary transition-colors cursor-pointer rounded-full"
+                                className="w-10 h-10 flex items-center justify-center text-text-dim hover:text-text-primary transition-colors cursor-pointer rounded-full"
                             >
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <circle cx="12" cy="12" r="10" /><path d="M8 14s1.5 2 4 2 4-2 4-2" /><line x1="9" y1="9" x2="9.01" y2="9" /><line x1="15" y1="9" x2="15.01" y2="9" />
@@ -925,7 +925,7 @@ export default function ChatArea({ chatMode, privateChatUserId, onBack }: Props)
                     {hasSomethingToSend ? (
                         <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.9 }}
                             onClick={handleSend}
-                            className="w-10 h-10 rounded-full bg-accent text-bg-primary flex items-center justify-center flex-shrink-0 shadow-lg hover:bg-accent-hover transition-all cursor-pointer"
+                            className="w-11 h-11 rounded-full bg-accent text-bg-primary flex items-center justify-center flex-shrink-0 shadow-lg hover:bg-accent-hover transition-all cursor-pointer"
                         >
                             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                 <line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" />
@@ -934,7 +934,7 @@ export default function ChatArea({ chatMode, privateChatUserId, onBack }: Props)
                     ) : (
                         <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.9 }}
                             onClick={isRecording ? stopRecording : startRecording}
-                            className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-all cursor-pointer
+                            className={`w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 transition-all cursor-pointer
                                 ${isRecording ? 'bg-error text-white shadow-[0_0_12px_rgba(248,113,113,0.5)]' : 'bg-bg-card text-text-dim hover:text-text-primary border border-border'}`}
                         >
                             {isRecording ? (

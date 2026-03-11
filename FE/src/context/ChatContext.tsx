@@ -1,6 +1,15 @@
 import { createContext, useContext, useEffect, useRef, useState, useCallback, type ReactNode } from 'react';
 import type { ChatMessage, OnlineUser, ServerMessage, UserProfile } from '../types';
 
+function resolveWsUrl() {
+    const configured = import.meta.env.VITE_WS_URL as string | undefined;
+    if (configured) return configured;
+
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = window.location.hostname || 'localhost';
+    return `${protocol}//${host}:3000`;
+}
+
 interface ChatState {
     socket: WebSocket | null;
     connected: boolean;
@@ -99,7 +108,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
         function connect() {
             if (isCancelled) return;
-            ws = new WebSocket('ws://localhost:3000');
+            ws = new WebSocket(wsUrlRef.current);
             socketRef.current = ws;
 
             ws.onopen = () => {
@@ -422,3 +431,4 @@ function extractRoomFromNotification(msg: string): string | null {
     const m = msg.match(/\b(joined|left)\s+(\S+)$/);
     return m ? m[2] : null;
 }
+    const wsUrlRef = useRef(resolveWsUrl());

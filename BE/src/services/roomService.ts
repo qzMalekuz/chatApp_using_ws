@@ -1,32 +1,36 @@
+import { WebSocket } from "ws";
 import { Message, User } from "../types";
 import { findUserById } from "./userService";
+import { validateRoomName } from "../utils/validate";
 
 // rooms: roomName → Set of userId
 const rooms: Record<string, Set<number>> = {};
 
 export function joinRoom(user: User, roomName: string): void {
+    const safeRoom = validateRoomName(roomName);
+    if (!safeRoom) return;
     // Already in this room — ignore
-    if (user.rooms.includes(roomName)) return;
+    if (user.rooms.includes(safeRoom)) return;
 
-    if (!rooms[roomName]) {
-        rooms[roomName] = new Set();
+    if (!rooms[safeRoom]) {
+        rooms[safeRoom] = new Set();
     }
 
-    rooms[roomName].add(user.id);
-    user.rooms.push(roomName);
-    user.room = roomName;   // track last joined as primary (for backward compat)
+    rooms[safeRoom].add(user.id);
+    user.rooms.push(safeRoom);
+    user.room = safeRoom;   // track last joined as primary (for backward compat)
 
-    broadcastToRoom(roomName, {
+    broadcastToRoom(safeRoom, {
         type: "ROOM_NOTIFICATION",
         payload: {
-            message: `${user.username} joined ${roomName}`,
+            message: `${user.username} joined ${safeRoom}`,
             timestamp: new Date().toISOString(),
         },
     });
 }
 
 export function leaveRoom(user: User, roomName?: string): void {
-    const target = roomName || user.room;
+    const target = roomName ? validateRoomName(roomName) : user.room;
     if (!target) return;
     if (!user.rooms.includes(target)) return;
 
@@ -62,7 +66,9 @@ export function broadcastToRoom(roomName: string, message: Message): void {
 
     rooms[roomName].forEach((memberId) => {
         const member = findUserById(memberId);
-        if (member) member.ws.send(serialised);
+        if (member && member.ws.readyState === WebSocket.OPEN) {
+            member.ws.send(serialised);
+        }
     });
 }
 

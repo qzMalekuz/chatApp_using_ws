@@ -13,7 +13,7 @@ export default function ThemeToggle({ theme, onToggle, className = '' }: ThemeTo
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.88 }}
       transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-      className={`h-10 w-10 rounded-full border border-border bg-bg-card text-text-dim shadow-lg transition-colors hover:text-text-primary ${className}`}
+      className={`h-11 w-11 rounded-full border border-border bg-bg-card text-text-dim shadow-lg transition-colors hover:text-text-primary ${className}`}
       title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
       aria-label="Toggle theme"
     >

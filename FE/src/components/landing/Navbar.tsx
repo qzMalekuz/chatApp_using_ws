@@ -36,7 +36,7 @@ export default function Navbar({ onOpenChat, theme, onToggleTheme }: NavbarProps
           <ThemeToggle theme={theme} onToggle={onToggleTheme} />
           <button
             onClick={onOpenChat}
-            className="rounded-full border border-[var(--landing-text)] bg-[var(--landing-text)] px-5 py-2 text-sm font-semibold text-[var(--landing-bg)] transition-all duration-200 hover:opacity-90"
+            className="min-h-11 rounded-full border border-[var(--landing-text)] bg-[var(--landing-text)] px-5 py-2 text-sm font-semibold text-[var(--landing-bg)] transition-all duration-200 hover:opacity-90"
           >
             Get Started
           </button>
@@ -46,7 +46,7 @@ export default function Navbar({ onOpenChat, theme, onToggleTheme }: NavbarProps
           <ThemeToggle theme={theme} onToggle={onToggleTheme} />
           <button
             onClick={() => setMobileOpen((prev) => !prev)}
-            className="flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--landing-border)] text-[var(--landing-text)]"
+            className="flex h-11 w-11 items-center justify-center rounded-lg border border-[var(--landing-border)] text-[var(--landing-text)]"
             aria-label="Toggle menu"
             aria-expanded={mobileOpen}
           >

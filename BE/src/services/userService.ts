@@ -4,7 +4,7 @@ import { User } from "../types";
 let connectedUsers: User[] = [];
 let nextUserId = 0;
 
-export function addUser(ws: WebSocket, username?: string): User {
+export function addUser(ws: WebSocket, username?: string, ip = "unknown_ip"): User {
     nextUserId++;
 
     const newUser: User = {
@@ -17,6 +17,8 @@ export function addUser(ws: WebSocket, username?: string): User {
         ws,
         isAlive: true,
         lastMessageTimestamps: [],
+        ip,
+        recentMessageIds: [],
     };
 
     connectedUsers.push(newUser);
@@ -52,4 +54,12 @@ export function getPublicUserList(): { id: number; username: string; status: str
         status: user.status,
         avatarUrl: user.avatarUrl,
     }));
+}
+
+export function getActiveConnectionsByIp(ip: string): number {
+    return connectedUsers.filter((user) => user.ip === ip).length;
+}
+
+export function getActiveConnectionsByUsername(username: string): number {
+    return connectedUsers.filter((user) => user.username === username).length;
 }

@@ -37,3 +37,13 @@ export function checkWsConnectionRateLimit(ip: string): boolean {
 
     return false;
 }
+
+// Periodically clean stale records to avoid unbounded memory growth
+setInterval(() => {
+    const now = Date.now();
+    for (const [ip, record] of wsConnectionCounts.entries()) {
+        if (now - record.windowStart > WS_RATE_LIMIT_WINDOW_MS * 3) {
+            wsConnectionCounts.delete(ip);
+        }
+    }
+}, WS_RATE_LIMIT_WINDOW_MS).unref();

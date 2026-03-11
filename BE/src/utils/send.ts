@@ -8,6 +8,7 @@ import { Message } from "../types";
  * @param message - The message envelope to send.
  */
 export function sendJson(ws: WebSocket, message: Message): void {
+    if (ws.readyState !== WebSocket.OPEN) return;
     ws.send(JSON.stringify(message));
 }
 

@@ -1,13 +1,13 @@
 import { WebSocket } from "ws";
 import { addUser, removeUser } from "../services/userService";
 import { broadcast } from "../services/chatService";
-import { handleMessage } from "./messageHandler";
+import { handleMessage, leaveAllRooms } from "./messageHandler";
 
 
-export function handleConnection(ws: WebSocket, username?: string): void {
+export function handleConnection(ws: WebSocket, username?: string, ip?: string): void {
     console.log("Client Connected");
 
-    const newUser = addUser(ws, username);
+    const newUser = addUser(ws, username, ip);
 
     broadcast({
         type: "USER_JOINED",
@@ -23,7 +23,10 @@ export function handleConnection(ws: WebSocket, username?: string): void {
         newUser.isAlive = true;
     });
 
-    ws.on("message", (data: Buffer) => {
+    ws.on("message", (data: Buffer, isBinary: boolean) => {
+        if (isBinary) {
+            return;
+        }
         try {
             handleMessage(ws, data.toString());
         } catch (error) {
@@ -40,6 +43,7 @@ function handleDisconnection(ws: WebSocket): void {
     const departedUser = removeUser(ws);
 
     if (!departedUser) return;
+    leaveAllRooms(departedUser);
 
     broadcast({
         type: "USER_LEFT",

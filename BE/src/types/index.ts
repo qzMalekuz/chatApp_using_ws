@@ -12,6 +12,8 @@ export interface User {
     ws: WebSocket;
     isAlive: boolean;
     lastMessageTimestamps: number[];
+    ip: string;
+    recentMessageIds: string[];
 }
 
 export interface Message {

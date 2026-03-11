@@ -22,7 +22,7 @@ export default function CTASection({ onOpenChat }: CTASectionProps) {
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <button
               onClick={onOpenChat}
-              className="rounded-full border border-[var(--landing-text)] bg-[var(--landing-text)] px-6 py-3 text-sm font-semibold text-[var(--landing-bg)] transition-all duration-200 hover:opacity-90"
+              className="min-h-11 rounded-full border border-[var(--landing-text)] bg-[var(--landing-text)] px-6 py-3 text-sm font-semibold text-[var(--landing-bg)] transition-all duration-200 hover:opacity-90"
             >
               Open Chat
             </button>

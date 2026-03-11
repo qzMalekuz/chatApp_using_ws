@@ -1,3 +1,4 @@
+import { WebSocket } from "ws";
 import { Message, User } from "../types";
 import { sendError, sendJson } from "../utils/send";
 import { getAllUsers, findUserById } from "./userService";
@@ -5,7 +6,9 @@ import { getAllUsers, findUserById } from "./userService";
 export function broadcast(message: Message): void {
     const serialised = JSON.stringify(message);
     getAllUsers().forEach((connectedUser) => {
-        connectedUser.ws.send(serialised);
+        if (connectedUser.ws.readyState === WebSocket.OPEN) {
+            connectedUser.ws.send(serialised);
+        }
     });
 }
 
